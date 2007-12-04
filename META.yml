@@ -1,6 +1,6 @@
 ---
 name: Slackware-Slackget
-version: 0.13
+version: 0.14
 author:
   - 'Arnaud DUPUIS <a.dupuis@infinityperl.org>'
 abstract: The main slack-get 1.0 library
@@ -26,7 +26,7 @@ build_requires:
 provides:
   Slackware::Slackget:
     file: lib/Slackware/Slackget.pm
-    version: 0.13
+    version: 0.14
   Slackware::Slackget::Base:
     file: lib/Slackware/Slackget/Base.pm
     version: 1.0.3

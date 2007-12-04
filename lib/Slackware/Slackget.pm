@@ -14,11 +14,11 @@ Slackware::Slackget - The main slack-get 1.0 library
 
 =head1 VERSION
 
-Version 0.12
+Version 0.14
 
 =cut
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 =head1 SYNOPSIS
 

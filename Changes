@@ -70,3 +70,7 @@ Revision history for Slackware::Slackget
 
 0.13 <date>
 	- New namespace and module name : Slackware::Slackget
+
+0.14 Tue Dec 04 16:00:51 CEST 2007
+	- try to fix the unexplicated crash in config tests
+	- fix a bug in the driver's loading code in Slackware::Slackget::Network::Connection

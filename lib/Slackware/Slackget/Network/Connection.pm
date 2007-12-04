@@ -129,6 +129,7 @@ The recommended way is to give to the constructor the following arguments :
 sub new
 {
 	my ($class,@args) = @_ ;
+	print STDOUT "[Slackware::Slackget::Network::Connection] debug is enabled\n" if($DEBUG);
 	my $self={};
 	bless($self,$class);
 # 	print "scalar: ",scalar(@args),"\n";
@@ -137,6 +138,7 @@ sub new
 		return undef ;
 	}
 	elsif(scalar(@args) == 1 && $ENABLE_DEPRECATED_COMPATIBILITY_MODE){
+		print "[Slackware::Slackget::Network::Connection] [debug] ENABLE_DEPRECATED_COMPATIBILITY_MODE is activate.\n" if($DEBUG);
 		if(is_url($self,$args[0])){
 			parse_url($self,$args[0]) or return undef; # here is a really paranoid test because if this test fail it fail before (at is_url), so the "or return undef" is "de trop"
 			_load_network_module($self) or return undef;
@@ -146,13 +148,17 @@ sub new
 		}
 	}
 	else{
+		print "[Slackware::Slackget::Network::Connection] [debug] we are working in \"new mode\"\n" if($DEBUG);
 		my %args = @args;
 # 		warn "[Slackware::Slackget::Network::Connection] You need to provide a \"config\" parameter with a valid Slackware::Slackget::Config object reference.\n" if(!defined($args{config}) && ref($args{config}) ne 'Slackware::Slackget::Config') ;
 		if(exists($args{host}) && ((exists($args{config}) && ref($args{config}) eq 'Slackware::Slackget::Config') || defined($args{download_directory})) ) #(exists($args{path}) || exists($args{file}) ) && 
 		{
 			$self->{DATA}->{download_directory}=$args{download_directory} if(defined($args{download_directory}));
+			print "[Slackware::Slackget::Network::Connection] [debug] parsing url\n" if($DEBUG);
 			parse_url($self,$args{host}) or return undef;
+			print "[Slackware::Slackget::Network::Connection] [debug] going to load network's drivers\n" if($DEBUG);
 			_load_network_module($self) or return undef;
+			print "[Slackware::Slackget::Network::Connection] [debug] going to fill the internal data section\n" if($DEBUG);
 			_fill_data_section($self,\%args);
 			if(defined($args{InlineStates}) && ref($args{InlineStates}) eq 'HASH'){
 				$self->{InlineStates} = $args{InlineStates};
@@ -171,7 +177,7 @@ sub new
 		}
 		else
 		{
-			warn "[Slackware::Slackget::Network::Connection] you must provide the following parameters to the constructor :\n\thost\n\tconfig\n" ;
+			warn "[Slackware::Slackget::Network::Connection] you must provide the following parameters to the constructor :\n\thost\n\tconfig or download_directory\n" ;
 			return undef ;
 		}
 		%args = ();
@@ -181,7 +187,7 @@ sub new
 	@args = ();
 # 	$self->{STATUS} = {
 # 		0 => "All's good\n";
-# 	};
+# 	}
 	return $self;
 }
 
@@ -209,11 +215,16 @@ Take a string as argument and return TRUE (1) if $string is an http or ftp URL a
 
 sub is_url {
 	my ($self,$url)=@_;
+	if( $self->can('_validate_url') ){
+		if( $self->_validate_url($url) ){
+			return 1;
+		}
+	}
 	if($url=~ /file:\/\/(.+)/)
 	{
 		return 1;
 	}
-	elsif($url=~ /^([fhtps]{3,5}):\/\/([^\/]+){1}(\/.*)?$/){
+	elsif($url=~ /^(.+):\/\/([^\/]+){1}(\/.*)?$/){
 		return 1;
 	}
 	else{
@@ -262,7 +273,7 @@ sub parse_url {
 		return undef unless($self->{DATA}->{path});
 		return 1;
 	}
-	elsif(my @tmp = $url=~ /^([fhtps]{3,5}):\/\/([^\/]+){1}(\/.*)?$/){
+	elsif(my @tmp = $url=~ /^(.+):\/\/([^\/]+){1}(\/.*)?$/){
 		$self->{DATA}->{protocol} = $1;
 # 		print "[debug] setting host to : $2\n";
 		$self->{DATA}->{host} = $2;
@@ -314,7 +325,7 @@ sub _load_network_module {
 	print "[Slackware::Slackget::Network::Connection] [debug] preparing to load $driver driver.\n" if($DEBUG);
 	eval "require $driver;";
 	if($@){
-		warn "[Slackware::Slackget::Network::Connection] driver for the network protocol '$self->{DATA}->{protocol}' is not available.\n" ;
+		warn "[Slackware::Slackget::Network::Connection] driver for the network protocol '$self->{DATA}->{protocol}' is not available ($@).\n" ;
 		return undef ;
 	}
 	else{
@@ -399,7 +410,7 @@ sub get_file {
 		$self->post_event('download_finished',$file,$state);
 		return \$content;
 	}else{
-		$state->(1);
+		$state->current(1);
 		$self->post_event('download_error',$file,$state);
 		undef($content);
 		return undef;
@@ -426,6 +437,8 @@ This method return a Slackware::Slackget::Status object with the following objec
 
 A more explicit error string can be concatenate to state 1. This method also generate events based on the returned value. If nothing is returned it throw the "download_error" event, else it throw the "download_finished" event.
 
+All codes greater or equal than 1 should be considered as errors codes.
+
 At this for the moment this method throw a "progress" event with a progress value set at -1.
 
 This method call the <DRIVER>->__fetch_file() method.
@@ -434,7 +447,7 @@ This method call the <DRIVER>->__fetch_file() method.
 
 sub fetch_file {
 	my ($self,$file,@args) = @_;
-	$self->post_event('progress',$file,-1);
+	$self->post_event('progress',$file,-1,-9999);
 	my $status = $self->__fetch_file($file,@args);
 	if($status->current > 0){
 		$self->post_event('download_error',$file,$status);

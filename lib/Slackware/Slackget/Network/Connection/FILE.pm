@@ -55,7 +55,7 @@ This class is not designed to be instanciate alone or used alone. You have to us
 
 =head1 FUNCTIONS
 
-=head2 test_server
+=head2 __test_server
 
 This method test the rapidity of the repository, by timing a copy of the FILELIST.TXT file.
 

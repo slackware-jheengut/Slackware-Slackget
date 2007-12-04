@@ -3,6 +3,7 @@ package Slackware::Slackget::Config;
 use warnings;
 use strict;
 
+$XML::Simple::PREFERRED_PARSER='XML::Parser';
 use XML::Simple;
 
 =head1 NAME
