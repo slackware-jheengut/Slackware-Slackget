@@ -240,7 +240,7 @@ sub compil_packages_directory
 					{
 						# NOTE: this line was originally added to fix the bug reported by Adi Spivak but it doesn't work well
 						last if(!defined($file[$k]) or $file[$k]=~ /^\.\//);
-						$tmp .= "\t\t\t$file[$k]";
+						$tmp .= "\t\t\t$file[$k]" if( $file[$k] !~ /FILE\s*LIST\s*:\s*/);
 						$k++;
 					}
 	# 				print STDERR "[DEBUG] setting param 'description' to $tmp\n";
@@ -345,13 +345,13 @@ sub load_packages_list_from_xml_file {
 	my ($self,$file) = @_;
 	my $ref = {};
 	my $start = time();
-	$|++ ;
+	$|=1 ;
 # 	print "[DEBUG Slackware::Slackget::Base->load_packages_list_from_xml_file()] Going to parse '$file'\n";
-	printf("[slack-get] loading packages list...");
+	print "[slack-get] loading packages list...";
 	$XML::Simple::PREFERRED_PARSER='XML::Parser' ;
-	my $xml_in = XML::Simple::XMLin($file,KeyAttr => {'package' => 'id'});
-# 	print "[DEBUG Slackware::Slackget::Base->load_packages_list_from_xml_file()] '$file' correctly parsed in ", time() - $start," sec.\n" ;
+	my $xml_in = XML::Simple::XMLin($file,KeyAttr => {'package' => 'id'}, ForceArray => ['dependencies','dependency','required','suggested']);
 	print "ok (loaded in ", time() - $start," sec.)\n";
+# 	print "[DEBUG Slackware::Slackget::Base->load_packages_list_from_xml_file()] '$file' correctly parsed in ", time() - $start," sec.\n" ;
 	foreach my $group (keys(%{$xml_in})){
 		my $package_list = new Slackware::Slackget::PackageList ;
 		foreach my $pack_name (keys(%{$xml_in->{$group}->{'package'}})){
@@ -477,7 +477,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

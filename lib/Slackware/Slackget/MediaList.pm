@@ -104,7 +104,7 @@ your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Slackware::Slackget
+    perldoc Slackware::Slackget::MediaList
 
 
 You can also look for information at:
@@ -113,7 +113,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

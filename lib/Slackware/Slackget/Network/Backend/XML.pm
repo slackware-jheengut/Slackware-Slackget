@@ -4,6 +4,7 @@ use warnings;
 use strict;
 require Slackware::Slackget::Network::Message ;
 require XML::Simple;
+require Data::Dumper;
 
 =head1 NAME
 
@@ -11,15 +12,21 @@ Slackware::Slackget::Network::Backend::XML - XML backend for slack-get network p
 
 =head1 VERSION
 
-Version 0.8.0
+Version 0.9.0
 
 =cut
 
-our $VERSION = '0.8.0';
+our $VERSION = '0.9.0';
 
 =head1 SYNOPSIS
 
-Still to do
+This module implements the XML backend for slack-get (sg_daemon, slack-get and more generally all Perl written parts of the slack-get project).
+
+You should not use this module directly but you should read this documentation ;-)
+
+This backend is a low-level one, it means that it needs access to the data structure of the Slackware::Slackget::Network::Message object it will encode (or decode but it's less critical in the decoding process). A bad idea is to encode the message with another backend which make the data structure unreadable by this one, before calling this XML backend (the Base64 backend for example)...
+
+You should *always* remember this fact in your development. If backend_encode() cannot access to the data structure you can expect some funny behaviors...
 
 =cut
 
@@ -30,6 +37,10 @@ sub new
 	bless($self,$class);
 	return $self;
 }
+
+=head1 DEBUG
+
+This module is affected by the envirronement variable SG_DAEMON_DEBUG. If it's set to a true value, it will output some debug messages.
 
 =head1 CONSTRUCTOR
 
@@ -49,12 +60,14 @@ All methods return a Slackware::Slackget::Network::Message (L<Slackware::Slackge
 
 sub backend_decode {
 	my $self = shift;
-	my $xml = join '', @_;
-	my $data = XML::Simple::XMLin( $xml );
+	my $xml_msg = shift;
+	print "[Slackware::Slackget::Network::Backend::XML] call backend_decode($xml_msg).\n" if($ENV{SG_DAEMON_DEBUG}) ;
+	print "[Slackware::Slackget::Network::Backend::XML] for message $xml_msg, data are :\n".$xml_msg->data."\n" if($ENV{SG_DAEMON_DEBUG}) ;
+	my $data = XML::Simple::XMLin( $xml_msg->data, ForceArray => ['li'], ForceContent => 1 );
 	delete($data->{version});
 	return Slackware::Slackget::Network::Message->new(
 		action => $data->{Enveloppe}->{Action}->{content},
-		action_id => $data->{Enveloppe}->{Action}->{content},
+		action_id => $data->{Enveloppe}->{Action}->{id},
 		raw_data => $data
 	);
 }
@@ -66,12 +79,24 @@ sub backend_decode {
 sub backend_encode {
 	my $self = shift;
 	my $message = shift ;
+	print "[Slackware::Slackget::Network::Backend::XML] call backend_encode($message).\n" if($ENV{SG_DAEMON_DEBUG}) ;
 	sub _data_to_string {
 		my $ref = shift;
 		my $str = '';
 		foreach my $k ( keys(%{$ref}) ){
+			my $end_tag=1;
 			if(ref($ref->{$k})){
-				if(defined($ref->{$k}->{'content'})){
+				if( ref($ref->{$k}) eq 'ARRAY' ){
+					$end_tag=0;
+					foreach my $ai (@{$ref->{$k}}){
+						if(ref($ai) eq ''){
+							$str .= "<$k>$ai</$k>\n";
+						}else{
+							$str .= "<$k>"._data_to_string($ai)."</$k>";
+						}
+					}
+				}
+				elsif(defined($ref->{$k}->{'content'})){
 					$str .= "<$k ";
 					foreach my $sk ( keys(%{$ref->{$k}}) ){
 						next if($sk eq 'content');
@@ -83,7 +108,7 @@ sub backend_encode {
 					$str .= _data_to_string($ref->{$k});
 				}
 			}
-			$str .= "</$k>\n";
+			$str .= "</$k>\n" if($end_tag);
 		}
 		return $str;
 	}
@@ -91,7 +116,12 @@ sub backend_encode {
 	my $xml = "<?xml version=\"1.0\" ?>\n<SlackGetProtocol version=\"".Slackware::Slackget::Network::SLACK_GET_PROTOCOL_VERSION."\">\n";
 	$xml .= _data_to_string($message->data());
 	$xml .= "</SlackGetProtocol>\n";
-	return $xml;
+	print "[Slackware::Slackget::Network::Backend::XML] encoded XML:\n$xml\n" if($ENV{SG_DAEMON_DEBUG});
+	return Slackware::Slackget::Network::Message->new(
+		action => $message->data()->{Enveloppe}->{Action}->{content},
+		action_id => $message->data()->{Enveloppe}->{Action}->{id},
+		raw_data => $xml,
+	);
 }
 
 
@@ -121,7 +151,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

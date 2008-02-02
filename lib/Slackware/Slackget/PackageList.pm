@@ -173,6 +173,7 @@ sub index_list
 	$self->{INDEX} = {} ;
 	foreach my $pkg (@{$self->{LIST}})
 	{
+# 		print "[Slackware::Slackget::PackageList] indexing package: ",$pkg->get_id(),"\n";
 		$self->{INDEX}->{$pkg->get_id()} = $pkg ;
 	}
 	return 1;
@@ -241,7 +242,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

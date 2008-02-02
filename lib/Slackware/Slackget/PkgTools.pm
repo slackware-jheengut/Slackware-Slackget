@@ -6,21 +6,34 @@ use strict;
 require Slackware::Slackget::Status ;
 use File::Copy ;
 
+use constant {
+	PKG_INSTALL_OK				=>	0x43001,
+	PKG_UPGRADE_OK				=>	0x43003,
+	PKG_REMOVE_OK				=>	0x43005,
+	PKG_INSTALL_FAIL				=>	0x43002,
+	PKG_UPGRADE_FAIL				=>	0x43004,
+	PKG_REMOVE_FAIL				=>	0x43006,
+	PKG_NOT_FOUND_INSTALL_FAIL	=>	0x43007,
+	PKG_NOT_FOUND_UPGRADE_FAIL	=>	0x43008,
+	PKG_NOT_FOUND_REMOVE_FAIL	=>	0x43009,
+	PKG_UNKNOWN_FAIL			=>	0x43010,
+};
+
 =head1 NAME
 
 Slackware::Slackget::PkgTools - A wrapper for the pkgtools action(installpkg, upgradepkg and removepkg)
 
 =head1 VERSION
 
-Version 1.0.0
+Version 1.0.1
 
 =cut
 
-our $VERSION = '1.0.0';
+our $VERSION = '1.0.1';
 
 =head1 SYNOPSIS
 
-This class is anoter wrapper for slack-get. It will encapsulate the pkgtools system call.
+This class is anoter wrapper for slack-get. It encapsulates the pkgtools system call.
 
     use Slackware::Slackget::PkgTools;
 
@@ -37,27 +50,30 @@ This class is anoter wrapper for slack-get. It will encapsulate the pkgtools sys
 
 sub new
 {
-	my ($class,$config) = @_ ;
+	my ($class,$config,%args) = @_ ;
 	return undef if(!defined($config) && ref($config) ne 'Slackware::Slackget::Config') ;
 	my $self={};
 	$self->{CONF} = $config ;
-	$self->{STATUS} = {
-		0 => "Package have been installed successfully.\n",
-		1 => "Package have been upgraded successfully.\n",
-		2 => "Package have been removed successfully.\n",
-		3 => "Can't install package : new package not found in the cache.\n",
-		4 => "Can't remove package : no such package installed.\n",
-		5 => "Can't upgrade package : new package not found in the cache.\n",
-		6 => "Can't install package : an error occured during $self->{CONF}->{common}->{pkgtools}->{'installpkg-binary'} system call\n",
-		7 => "Can't remove package : an error occured during $self->{CONF}->{common}->{pkgtools}->{'removepkg-binary'} system call\n",
-		8 => "Can't upgrade package : an error occured during $self->{CONF}->{common}->{pkgtools}->{'upgradepkg-binary'} system call\n",
-		9 => "Package scheduled for install on next reboot.\n",
-		10 => "An error occured in the Slackware::Slackget::PkgTool class (during installpkg, upgradepkg or removepkg) but the class is unable to understand the error.\n"
+	$self->{SUCCESS_STATUS} = {
+		PKG_INSTALL_OK	=> "Package have been installed successfully.\n",
+		PKG_UPGRADE_OK	=> "Package have been upgraded successfully.\n",
+		PKG_REMOVE_OK	=> "Package have been removed successfully.\n",
+	};
+	$self->{ERROR_STATUS}={
+		PKG_NOT_FOUND_INSTALL_FAIL	=> "Can't install package : new package not found in the cache.\n",
+		PKG_NOT_FOUND_REMOVE_FAIL	=> "Can't remove package : no such package installed.\n",
+		PKG_NOT_FOUND_UPGRADE_FAIL	=> "Can't upgrade package : new package not found in the cache.\n",
+		PKG_INSTALL_FAIL				=> "Can't install package : an error occured during $self->{CONF}->{common}->{pkgtools}->{'installpkg-binary'} system call\n",
+		PKG_REMOVE_FAIL				=> "Can't remove package : an error occured during $self->{CONF}->{common}->{pkgtools}->{'removepkg-binary'} system call\n",
+		PKG_UPGRADE_FAIL				=> "Can't upgrade package : an error occured during $self->{CONF}->{common}->{pkgtools}->{'upgradepkg-binary'} system call\n",
+		PKG_UNKNOWN_FAIL => "An error occured in the Slackware::Slackget::PkgTool class (during installpkg, upgradepkg or removepkg) but the class is unable to understand the error.\n",
 	};
 	$self->{DATA} = {
 		'info-output' => undef,
-		'connection-id' => 0
+		'connection-id' => 0,
+		'fake_mode' => 0,
 	};
+	$self->{DATA}->{'fake_mode'} = $args{'fake_mode'} if(defined($args{'fake_mode'}));
 	bless($self,$class);
 	
 	return $self;
@@ -76,6 +92,7 @@ sub _send_info
 {
 	my ($self,$action,$pkg) = @_;
 	my $client=0;
+	return 0 unless(defined($self->{DATA}->{'info-output'}) && $self->{DATA}->{'info-output'});
 	$client = $self->{DATA}->{'info-output'} if(defined($self->{DATA}->{'info-output'}) && $self->{DATA}->{'info-output'});
 	#print for debug purpose
 	print "[Slackware::Slackget::PkgTools::DEBUG] info:$self->{DATA}->{'connection-id'}:2:progress:file=$pkg;state=now$action\n";
@@ -113,7 +130,7 @@ sub install {
 	sub _install_package
 	{
 		my ($self,$pkg) = @_;
-		my $status = new Slackware::Slackget::Status (codes => $self->{STATUS});
+		my $status = new Slackware::Slackget::Status (success_codes => $self->{SUCCESS_STATUS}, error_codes => $self->{ERROR_STATUS});
 		#$self->{CONF}->{common}->{'update-directory'}/".$server->shortname."/cache/
 # 		print "[Slackware::Slackget::PkgTools::_install_package DEBUG] try to install package ",$pkg->get_id,"\n";
 		if($pkg->getValue('install_later'))
@@ -128,13 +145,13 @@ sub install {
 			if(system("2>>$self->{CONF}->{common}->{'log'}->{'log-file'} $self->{CONF}->{common}->{pkgtools}->{'installpkg-binary'} $self->{CONF}->{common}->{'update-directory'}/package-cache/".$pkg->get_id.".tgz")==0)
 			{
 # 				print "[Slackware::Slackget::PkgTools::_install_package DEBUG] package ",$pkg->get_id," have been correctly installed\n";
-				$status->current(0);
+				$status->current(PKG_INSTALL_OK);
 				return $status ;
 			}
 			else
 			{
 # 				print "[Slackware::Slackget::PkgTools::_install_package DEBUG] package ",$pkg->get_id," have NOT been correctly installed\n";
-				$status->current(6);
+				$status->current(PKG_INSTALL_FAIL);
 				return $status ;
 			}
 			
@@ -142,7 +159,7 @@ sub install {
 		else
 		{
 # 			print "[Slackware::Slackget::PkgTools::_install_package DEBUG] package ",$pkg->get_id," can't be installed.\n";
-			$status->current(3);
+			$status->current(PKG_NOT_FOUND_INSTALL_FAIL);
 			return $status ;
 		}
 	}
@@ -183,7 +200,7 @@ sub upgrade {
 	sub _upgrade_package
 	{
 		my ($self,$pkg) = @_;
-		my $status = new Slackware::Slackget::Status (codes => $self->{STATUS});
+		my $status = new Slackware::Slackget::Status (success_codes => $self->{SUCCESS_STATUS}, error_codes => $self->{ERROR_STATUS});
 		#$self->{CONF}->{common}->{'update-directory'}/".$server->shortname."/cache/
 		if( -e "$self->{CONF}->{common}->{'update-directory'}/package-cache/".$pkg->get_id.".tgz")
 		{
@@ -191,18 +208,18 @@ sub upgrade {
 # 			print "\tTrying to upgrade package: $self->{CONF}->{common}->{'update-directory'}/package-cache/".$pkg->get_id.".tgz\n";
 			if(system("2>>$self->{CONF}->{common}->{'log'}->{'log-file'} $self->{CONF}->{common}->{pkgtools}->{'upgradepkg-binary'} $self->{CONF}->{common}->{'update-directory'}/package-cache/".$pkg->get_id.".tgz")==0)
 			{
-				$status->current(1);
+				$status->current(PKG_UPGRADE_OK);
 				return $status ;
 			}
 			else
 			{
-				$status->current(8);
+				$status->current(PKG_UPGRADE_FAIL);
 				return $status ;
 			}
 		}
 		else
 		{
-			$status->current(5);
+			$status->current(PKG_NOT_FOUND_UPGRADE_FAIL);
 			return $status ;
 		}
 	}
@@ -231,7 +248,7 @@ sub upgrade {
 Take a single Slackware::Slackget::Package object or a single Slackware::Slackget::PackageList as argument and call installpkg on all this packages.
 Return 1 or undef if an error occured. But methods from the Slackware::Slackget::PkgTools class don't return on the first error, it will try to install all packages. Additionnally, for each package, set a status. 
 
-	$pkgtool->install($package_list);
+	$pkgtool->remove($package_list);
 
 =cut
 
@@ -240,26 +257,30 @@ sub remove {
 	sub _remove_package
 	{
 		my ($self,$pkg) = @_;
-		my $status = new Slackware::Slackget::Status (codes => $self->{STATUS});
+		my $status = new Slackware::Slackget::Status (success_codes => $self->{SUCCESS_STATUS}, error_codes => $self->{ERROR_STATUS});
 		#$self->{CONF}->{common}->{'update-directory'}/".$server->shortname."/cache/
 		if( -e "$self->{CONF}->{common}->{'packages-history-dir'}/".$pkg->get_id)
 		{
 			$self->_send_info('remove',$pkg->get_id());
 # 			print "\tTrying to remove package: ".$pkg->get_id."\n";
-			if(system("2>>$self->{CONF}->{common}->{'log'}->{'log-file'} $self->{CONF}->{common}->{pkgtools}->{'removepkg-binary'} ".$pkg->get_id)==0)
+			# TODO: the error output is not logged anymore in the PkgTools calls. It must be fixed.
+			if(system("$self->{CONF}->{common}->{pkgtools}->{'removepkg-binary'} ".$pkg->get_id)==0)
 			{
-				$status->current(2);
+				print "[Slackware::Slackget::PkgTools] (removepkg) setting (success) status ",PKG_REMOVE_OK,"\n";
+				$status->current(PKG_REMOVE_OK);
 				return $status ;
 			}
 			else
 			{
-				$status->current(7);
+				print "[Slackware::Slackget::PkgTools] (removepkg) setting (failed) status ",PKG_REMOVE_FAIL,"\n";
+				$status->current(PKG_REMOVE_FAIL);
 				return $status ;
 			}
 		}
 		else
 		{
-			$status->current(4);
+			print "[Slackware::Slackget::PkgTools] (removepkg) setting (fail) status ",PKG_NOT_FOUND_REMOVE_FAIL,"\n";
+			$status->current(PKG_NOT_FOUND_REMOVE_FAIL);
 			return $status ;
 		}
 	}
@@ -282,34 +303,6 @@ sub remove {
 		return undef;
 	}
 }
-
-=head2 info_output
-
-Accessor to set/get the output medium to send informations about current operation. You must set a valid handle (STD*, filehandle, socket, etc.) or undef.
-
-You can get an undefined value if the handle is not set.
-
-Setting the output media activate the output system.
-
-=cut
-
-sub info_output
-{
-	return $_[1] ? $_[0]->{DATA}->{'info-output'}=$_[1] : $_[0]->{DATA}->{'info-output'};
-}
-
-=head2 connection_id
-
-Accessor to set/get the connection id of a connection to or from a slack-get daemon. This is here if the output handle is that kind of connection. Anyway this value must be true so set it to 1 if you want an output.
-
-=cut
-
-sub connection_id
-{
-	return $_[1] ? $_[0]->{DATA}->{'connection-id'}=$_[1] : $_[0]->{DATA}->{'connection-id'};
-}
-
-
 
 =head1 AUTHOR
 
@@ -336,7 +329,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

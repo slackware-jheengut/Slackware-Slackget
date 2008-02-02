@@ -9,11 +9,11 @@ Slackware::Slackget::File - A class to manage files.
 
 =head1 VERSION
 
-Version 1.0.3
+Version 1.0.4
 
 =cut
 
-our $VERSION = '1.0.3';
+our $VERSION = '1.0.4';
 
 =head1 SYNOPSIS
 
@@ -32,6 +32,8 @@ Access to hard disk are saved by taking a copy of the file in memory, so if you 
 	$file->Read("baz.txt"); # Or changing file (the object will be update with the new file)
 
 The main advantage of this module is that you don't work directly on the file but on a copy. So you can make errors, they won't be wrote until you call the Write() method
+
+** ATTENTION ** this module can fail to load file on non-UNIX system because it rely on the "file" and "awk" command line tools. Be sure to use the 'load-raw' => 1 constructor's option on such operating system (most probably the file type will be blank and no problem will happen... but it's still a possibility).
 
 =cut
 
@@ -227,12 +229,22 @@ sub Read
 
 }
 
-=head2 Lock_file
+=head2 Lock_file (deprecated)
+
+Same as lock_file, provided for backward compatibility.
+
+=cut
+
+sub Lock_file {
+	return lock_file(@_);
+}
+
+=head2 lock_file
 
 This method lock the file for slack-get application (not really for others...) by creating a file with the name of the current open file plus a ".lock". This is not a protection but an information system for slack-getd sub process. This method return undef if the lock can't be made.
 
 	my $file = new Slackware::Slackget::File ('test.txt');
-	$file->Lock_file ; # create a file test.txt.lock
+	$file->lock_file ; # create a file test.txt.lock
 
 ATTENTION: You can only lock the current file of the object. With the previous example you can't do :
 
@@ -242,7 +254,7 @@ ATTENTION 2 : Don't forget to unlock your locked file :)
 
 =cut
 
-sub Lock_file
+sub lock_file
 {
 	my $self = shift;
 	return undef if $self->is_locked ;
@@ -251,11 +263,21 @@ sub Lock_file
 	return 1;
 }
 
-=head2 Unlock_file
+=head2 Unlock_file (deprecated)
+
+Same as unlock_file(), provided for backward compatibility.
+
+=cut
+
+sub Unlock_file {
+	return unlock_file(@_);
+}
+
+=head2 unlock_file
 
 Unlock a locked file. Only the locker object can unlock a file ! Return 1 if all goes well, else return undef. Return 2 if the file was not locked. Return 0 (false in scalar context) if the file was locked but by another Slackware::Slackget::File object.
 
-	my $status = $file->Unlock_file ;
+	my $status = $file->unlock_file ;
 
 Returned value are :
 
@@ -269,7 +291,7 @@ Returned value are :
 
 =cut
 
-sub Unlock_file
+sub unlock_file
 {
 	my $self = shift;
 	if($self->is_locked)
@@ -295,7 +317,7 @@ sub _verify_lock_maker
 {
 	my $self = shift;
 	my $file = new Slackware::Slackget::File ("$self->{FILENAME}.lock");
-	my $locker = $file->Get_line(0) ;
+	my $locker = $file->get_line(0) ;
 # 	print "\t[DEBUG] ( Slackware::Slackget::File in _verify_lock_maker() ) locker of file \"$self->{FILENAME}\" is $locker and current object is $self\n";
 	$file->Close ;
 	undef($file);
@@ -394,60 +416,102 @@ sub Write
 	return 1;
 }
 
-=head2 Add
+=head2 Add (deprecated)
 
-Take a table of lines and add them to the end of file image (in memory). You need to commit your change by calling the Write() method !
-
-	$file->Add(@data);
-	or
-	$file->Add($data);
-	or
-	$file->Add("this is some data\n");
+Same as add(), provided for backward compatibility.
 
 =cut
 
 sub Add {
+	return add(@_);
+}
+
+=head2 add
+
+Take a table of lines and add them to the end of file image (in memory). You need to commit your change by calling the Write() method !
+
+	$file->add(@data);
+	or
+	$file->add($data);
+	or
+	$file->add("this is some data\n");
+
+=cut
+
+sub add {
 	my ($self,@data) = @_;
 	$self->{FILE} = [@{$self->{FILE}},@data];
 }
 
-=head2 Get_file
+=head2 Get_file (deprecated)
 
-Return the current file in memory as an array.
-
-	@file = $file->Get_file();
+Same as get_file(), provided for backward compatibility.
 
 =cut
 
-sub Get_file{
+sub Get_file {
+	return get_file(@_);
+}
+
+=head2 get_file
+
+Return the current file in memory as an array.
+
+	@file = $file->get_file();
+
+=cut
+
+sub get_file{
 	my $self = shift;
 	return @{$self->{FILE}};
 }
 
-=head2 Get_line
 
-Return the $index line of the file (the index start at 0).
+=head2 Get_line (deprecated)
 
-	@file = $file->Get_line($index);
+Same as get_line(), provided for backward compatibility.
 
 =cut
 
 sub Get_line {
+	return get_line(@_);
+}
+
+
+=head2 get_line
+
+Return the $index line of the file (the index start at 0).
+
+	@file = $file->get_line($index);
+
+=cut
+
+sub get_line {
 	my ($self,$index) = @_;
 	return $self->{FILE}->[$index];
 }
 
-=head2 Get_selection
+=head2 Get_selection (deprecated)
+
+Same as get_selection(), provided for backward compatibility.
+
+=cut
+
+sub Get_selection {
+	return get_selection(@_);
+}
+
+=head2 get_selection
 
 	Same as get file but return only lines between $start and $stop.
 
-	my @array = $file->Get_selection($start,$stop);
+	my @array = $file->get_selection($start,$stop);
 
 You can ommit the $stop parameter (in this case Get_line() return the lines from $start to the end of file)
 
 =cut
 
-sub Get_selection {
+sub get_selection {
 	my ($self,$start,$stop) = @_ ;
 	$start = 0 unless($start);
 	$stop = $#{$self->{FILE}} unless($stop);
@@ -466,19 +530,31 @@ Free the memory. This method close the current file memory image. If you don't c
 sub Close {
 	my $self = shift;
 	$self->{FILE} = [];
+	return 1;
 }
 
-=head2 Write_and_close
 
-An alias which call Write() and then Close();
+=head2 Write_and_close (deprecated)
 
-	$file->Write_and_close();
-	or
-	$file->Write_and_close("foo.txt");
+Same as write_and_close(), provided for backward compatibility.
 
 =cut
 
-sub Write_and_close{
+sub Write_and_close {
+	return write_and_close(@_);
+}
+
+=head2 write_and_close
+
+An alias which call Write() and then Close();
+
+	$file->write_and_close();
+	or
+	$file->write_and_close("foo.txt");
+
+=cut
+
+sub write_and_close{
 	my ($self,$file) = @_;
 	$self->Write($file);
 	$self->Close();
@@ -496,16 +572,6 @@ Without parameter return the current file encoding, with a parameter set the enc
 sub encoding
 {
 	return $_[1] ? $_[0]->{'file-encoding'}=$_[1] : $_[0]->{'file-encoding'};
-# 	Idem au code suivant (qui est vachement plus clair mais aussi beeeeaaaaauuuucoup plus long), on economise ici 2 variables locales : meilleurs perf.
-# 	my ($self,$encoding) = @_;
-# 	if(defined($encoding))
-# 	{
-# 		$self->{'file-encoding'} = $encoding ;
-# 	}
-# 	else
-# 	{
-# 		return $self->{'file-encoding'};
-# 	}
 }
 
 =head2 filename
@@ -514,11 +580,15 @@ Return the filename of the file which is currently process by the Slackware::Sla
 
 	print $file->filename
 
+You can also set the filename :
+
+	$file->filename('foo.txt');
+
 =cut
 
 sub filename
 {
-	return $_[0]->{FILENAME} ;
+	return $_[1] ? $_[0]->{FILENAME}=$_[1] : $_[0]->{FILENAME};
 }
 
 =head1 AUTHOR
@@ -537,7 +607,7 @@ your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Slackware::Slackget
+    perldoc Slackware::Slackget::File
 
 
 You can also look for information at:
@@ -546,7 +616,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

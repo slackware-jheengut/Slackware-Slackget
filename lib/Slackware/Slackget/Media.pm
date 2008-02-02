@@ -76,35 +76,58 @@ sub new
 	$self->{DATA} = {%args};
 	$self->{DATA}->{hosts}->{old} = [] ;
 	bless($self,$class);
-	
+	$self->set_value('host',$args{'update-repository'}->{'faster'}) if(defined($args{'update-repository'}->{'faster'}));
 	return $self;
 }
 
 =head1 FUNCTIONS
 
-=head2 setValue
+=head2 set_value
 
 Set the value of a named key to the value passed in argument.
 
-	$package->setValue($key,$value);
+	$package->set_value($key,$value);
+
+Return the value you just tried to set (usefull for integrity checks).
+
+=cut
+
+sub set_value {
+	my ($self,$key,$value) = @_ ;
+# 	print "Setting $key=$value for $self\n";
+	$self->{DATA}->{$key} = $value ;
+	return $self->{DATA}->{$key};
+}
+
+=head2 setValue (deprecated)
+
+Same as set_value(), provided for backward compatibility.
 
 =cut
 
 sub setValue {
-	my ($self,$key,$value) = @_ ;
-# 	print "Setting $key=$value for $self\n";
-	$self->{DATA}->{$key} = $value ;
+	return set_value(@_);
 }
 
-=head2 getValue
+=head2 getValue (deprecated)
 
-Return the value of a key :
-
-	$string = $media->getValue($key);
+Same as get_value(), provided for backward compatibility.
 
 =cut
 
 sub getValue {
+	return get_value(@_);
+}
+
+=head2 get_value
+
+Return the value of a key :
+
+	$string = $media->get_value($key);
+
+=cut
+
+sub get_value {
 	my ($self,$key) = @_ ;
 	return $self->{DATA}->{$key};
 }
@@ -329,7 +352,7 @@ sub to_string
 
 =head1 ACCESSORS
 
-Some accessors for the current object/
+Some accessors for the current object.
 
 =cut
 
@@ -395,15 +418,27 @@ sub set_fast_medias_array {1;}
 
 Different methods to properly output a media.
 
-=head2 to_XML
+=cut
 
-return the media info as an XML encoded string.
+=head2 to_XML (deprecated)
 
-	$xml = $media->to_XML();
+Same as to_xml(), provided for backward compatibility.
 
 =cut
 
-sub to_XML
+sub to_XML {
+	return to_xml(@_);
+}
+
+=head2 to_xml
+
+return the media info as an XML encoded string.
+
+	$xml = $media->to_xml();
+
+=cut
+
+sub to_xml
 {
 	my $self = shift;
 	return undef unless(defined($self->{ID}));
@@ -461,15 +496,25 @@ sub to_XML
 	return $xml;
 }
 
-=head2 to_HTML
+=head2 to_HTML (deprecated)
 
-return the media info as an HTML encoded string.
-
-	$xml = $media->to_HTML();
+Same as to_html(), provided for backward compatibility.
 
 =cut
 
-sub to_HTML
+sub to_HTML {
+	return to_html(@_);
+}
+
+=head2 to_html
+
+return the media info as an HTML encoded string.
+
+	$xml = $media->to_html();
+
+=cut
+
+sub to_html
 {
 	my $self = shift;
 	return undef unless(defined($self->{ID}));
@@ -494,7 +539,7 @@ your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Slackware::Slackget
+    perldoc Slackware::Slackget::Media
 
 
 You can also look for information at:
@@ -503,7 +548,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

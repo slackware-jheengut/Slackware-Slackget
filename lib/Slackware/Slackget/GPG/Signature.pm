@@ -4,21 +4,21 @@ package Slackware::Slackget::GPG::Signature;
 use warnings;
 use strict;
 
-=head1 NOM
+=head1 NAME
 
 Slackware::Slackget::GPG::Signature - A simple class to represent an output of gpg signature verification.
 
 =head1 VERSION
 
-Version 0.1
+Version 0.5
 
 =cut
 
-our $VERSION = '0.1';
+our $VERSION = '0.5';
 
 =head1 SYNOPSIS
 
-A simple class to represent an output of gpg signature verification.
+A simple class to represent an output of gpg signature verification. This class parse the output of the 'gpg' command line tool.
 
     use Slackware::Slackget::GPG::Signature;
 
@@ -169,7 +169,7 @@ your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Slackware::Slackget
+    perldoc Slackware::Slackget::GPG::Signature
 
 
 You can also look for information at:

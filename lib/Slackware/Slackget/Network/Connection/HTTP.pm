@@ -5,6 +5,7 @@ use strict;
 
 use LWP::Simple ;
 use File::Basename ;
+require File::Copy;
 require HTTP::Status ;
 require Slackware::Slackget::Network::Connection ;
 require Time::HiRes ;
@@ -147,17 +148,19 @@ sub __fetch_file {
 	my $url = $self->protocol().'://'.$self->host().'/'.$self->path().'/'.$remote_file;
 	$url = $self->strip_slash($url);
 #  	print "\n[debug http] save the fetched file ($url) to $local_file\n";
-	my $ret_code = getstore($url,$local_file) ;
+	my $ret_code = getstore($url,$local_file.'.part') ;
+	File::Copy::move($local_file.'.part',$local_file);
 	my $tmp_status_message = status_message( $ret_code );
 	$tmp_status_message=~ s/\n/<br\/>/g;
 	my $state =  Slackware::Slackget::Status->new(codes => {
 		0 => "All goes well.<br/> Server said: <br/>$ret_code - $tmp_status_message",
 		1 => "Server error, you must choose the next host for this server.<br/> Server said: <br/>$ret_code - $tmp_status_message",
-		2 => "Client error, it seems that you have a problem with you connection or with the slackget10 library <br/>(or with a library which we depended on). It is also possible that the file we try to download was not on the remote server.<br/> Server said: <br/>$ret_code - $tmp_status_message",
+		2 => "Client error, it seems that you have a problem with you connection or with the Slackware::Slackget library <br/>(or with a library which we depended on). It is also possible that the file we try to download was not on the remote server.<br/> Server said: <br/>$ret_code - $tmp_status_message",
 		3 => "Server has redirected us, we prefer direct connection, change host for this server.<br/> Server said: <br/>$ret_code - $tmp_status_message",
-		4 => "The HTTP connection is not a success and we are not able to know what, we recommend to change the current host of this server.<br/> Server said: <br/>$ret_code - $tmp_status_message"
+		4 => "The HTTP connection is not a success and we are not able to know what is the problem, we recommend to change the current host of this server.<br/> Server said: <br/>$ret_code - $tmp_status_message"
 	});
 	if(is_success($ret_code)){
+		File::Copy::move( $local_file.'.part' , $local_file );
 		$state->current(0);
 	}
 	else
@@ -243,7 +246,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

@@ -8,20 +8,20 @@ WriteMakefile
           'EXE_FILES' => [],
           'VERSION_FROM' => 'lib/Slackware/Slackget.pm',
           'PREREQ_PM' => {
-                           'POE::Component::Logger' => 0,
+                           'POE::Component::Logger' => '1.0',
                            'Getopt::Long' => 0,
                            'File::Copy' => '>= 2.08',
                            'Net::FTP' => '>= 2.75',
                            'Data::Dumper' => '>= 2.121_02',
-                           'XML::Simple' => 0,
+                           'XML::Simple' => '2.18',
                            'Time::HiRes' => '>= 1.66',
                            'HTTP::Status' => '>= 1.28',
-                           'Test::More' => 0,
+                           'Test::More' => '0.70',
                            'XML::Parser' => 0,
                            'Proc::Daemon' => 0,
                            'LWP::Simple' => '>= 1.41',
                            'HTTP::Request' => '>= 1.40',
-                           'POE' => 0
+                           'POE' => '0.9999'
                          }
         )
 ;

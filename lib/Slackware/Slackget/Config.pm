@@ -51,7 +51,7 @@ sub new
 {
 	my ($class,$file) = @_ ;
 	return undef unless(-e $file && -r $file);
-	my $self= XMLin($file) or return undef;
+	my $self= XMLin($file , ForceArray => ['li']) or return undef;
 # 	use Data::Dumper;
 # 	print Dumper($self);
 	return undef unless(defined($self->{common}));
@@ -61,6 +61,10 @@ sub new
 		delete($self->{'plugins'}->{'list'}->{'plug-in'});
 		$self->{'plugins'}->{'list'}->{'plug-in'}->{$tmp->{'id'}} = $tmp;
 		delete($self->{'plugins'}->{'list'}->{'plug-in'}->{$tmp->{'id'}}->{'id'});
+	}
+	if($ENV{SG_DAEMON_DEBUG}){
+		require Data::Dumper;
+		print Data::Dumper::Dumper( $self ),"\n";
 	}
 	bless($self,$class);
 	return $self;
@@ -350,7 +354,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

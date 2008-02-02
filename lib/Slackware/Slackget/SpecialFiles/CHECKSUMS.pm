@@ -147,7 +147,17 @@ sub get_result {
 	return $self->get_checksums(@_);
 }
 
-=head2 to_XML
+=head2 to_XML (deprecated)
+
+Same as to_xml(), provided for backward compatibility.
+
+=cut
+
+sub to_XML {
+	return to_xml(@_);
+}
+
+=head2 to_xml
 
 Translate the internale data structure into a single XML string. 
 
@@ -155,11 +165,11 @@ WARNING: this method is for debug ONLY, YOU NEVER HAVE TO CALL IT IN NORMAL USE.
 
 =cut
 
-sub to_XML {
+sub to_xml {
 	my $self = shift;
 	my $xml = "<checksums>\n";
 	foreach (keys(%{$self->{DATA}})){
-		$xml.=$self->{DATA}->{$_}->to_XML
+		$xml.=$self->{DATA}->{$_}->to_xml ;
 	}
 	$xml .= "</checksums>\n";
 	return $xml;
@@ -190,7 +200,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

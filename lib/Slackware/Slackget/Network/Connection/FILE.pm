@@ -150,7 +150,8 @@ sub __fetch_file {
 		1 => "Destination directory does not exist.",
 		2 => "Destination directory is not writable.",
 	});
-	if(copy($url,$local_file)){
+	if(copy($url,$local_file.'.part')){
+		move($local_file.'.part',$local_file);
 		$state->current(0);
 	}
 	else
@@ -212,7 +213,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

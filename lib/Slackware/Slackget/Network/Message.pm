@@ -25,16 +25,102 @@ This module is the evolution of the old Slackware::Slackget::Network::Response.
 
 =head2 new
 
-the constructor takes no argument.
+the constructor require no argument. But store every given argument in the object (which is a hashref).
+
+	my $msg = new Slackware::Slackget::Network::Message ;
 
 =cut
 
 sub new
 {
-	shift;
+	my $class = shift;
 	my $self = {@_};
-	bless $self;
+	bless($self,$class);
 	return $self;
+}
+
+=head2 new_from_data
+
+This is an alternative constructor to create a S::Sg::N::Message with the whole slack-get protocol compatible data structure.
+
+You must provide the following arguments :
+
+	* an action id (integer)
+	* a action (string)
+	* some data
+
+Here is a little example :
+
+	my $msg = Slackware::Slackget::Network::Message->new(
+		123456789,
+		'search',
+		@keywords,
+	);
+
+=cut
+
+sub new_from_data {
+	my $class = shift;
+	my $action_id = shift;
+	my $action = shift;
+	my @data = @_;
+	my $self = {};
+# 	my $self = {
+# 		raw_data => {
+# 				Enveloppe => {
+# 					Action => {
+# 						id => $action_id ,
+# 						content => $action,
+# 					},
+# 					Data => {
+# 						content => join('',@_),
+# 					},
+# 				}
+# 			}
+# 	};
+	bless($self,$class);
+	$self->create_enveloppe();
+	$self->{raw_data}->{Enveloppe}->{Action}->{id} = $action_id;
+	$self->{raw_data}->{Enveloppe}->{Action}->{content} = $action;
+	$self->{raw_data}->{Enveloppe}->{Data}->{content} = join('',@data);
+	return $self;
+}
+
+=head2 create_enveloppe
+
+Create a base enveloppe for the SlackGetProtocol in the raw_data section. This method access directly to the object's data structure.
+
+Be carefull not to use it on an already initialized object.
+
+	$self = {
+		action => 0,
+		action_id => 0,
+		raw_data => {
+				Enveloppe => {
+					Action => {
+						id => 0 ,
+						content => 0,
+					},
+					Data => {},
+				}
+			}
+	};
+
+=cut
+
+sub create_enveloppe {
+	my $self = shift;
+	$self->action(0);
+	$self->action_id(0);
+	$self->{raw_data} =  {
+		Enveloppe => {
+			Action => {
+				id => 0 ,
+				content => 0,
+			},
+			Data => {},
+		}
+	};
 }
 
 =head2 is_success
@@ -105,7 +191,29 @@ return (or set) the action of the message (all network messages must have an act
 sub action{
 	my $self = shift;
 	my $data = shift;
-	return $data ? $self->{action}=$data : $self->{action};
+	if($data){
+		$self->{raw_data}->{Enveloppe}->{Action}->{content} = $data if(exists($self->{raw_data}->{Enveloppe}->{Action}) && ref($self->{raw_data}->{Enveloppe}->{Action}) eq 'HASH' );
+		 $self->{action}=$data
+	}else{
+		return $self->{action};
+	}
+}
+
+=head2 action_id
+
+return (or set) the action ID of the message (all network messages must have an action id).
+
+=cut
+
+sub action_id{
+	my $self = shift;
+	my $data = shift;
+	if($data){
+		$self->{raw_data}->{Enveloppe}->{Action}->{id} = $data if(exists($self->{raw_data}->{Enveloppe}->{Action}) && ref($self->{raw_data}->{Enveloppe}->{Action}) eq 'HASH' );
+		 $self->{action_id}=$data
+	}else{
+		return $self->{action_id};
+	}
 }
 
 
@@ -134,7 +242,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

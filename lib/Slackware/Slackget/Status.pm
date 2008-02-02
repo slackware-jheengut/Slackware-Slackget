@@ -9,11 +9,11 @@ Slackware::Slackget::Status - A class for returning a status code with its expla
 
 =head1 VERSION
 
-Version 1.0.0
+Version 1.0.99
 
 =cut
 
-our $VERSION = '1.0.0';
+our $VERSION = '1.0.99';
 
 =head1 SYNOPSIS
 
@@ -42,8 +42,10 @@ sub new
 {
 	my ($class,%arg) = @_ ;
 	my $self={ CURRENT_CODE => undef };
-	return undef if(!defined($arg{'codes'}) && ref($arg{codes}) ne 'HASH');
+# 	return undef if(!defined($arg{'codes'}) && ref($arg{codes}) ne 'HASH');
 	$self->{CODES} = $arg{'codes'} ;
+	$self->{ERROR_CODES} = $arg{'error_codes'} if($arg{'error_codes'}) ;
+	$self->{SUCCESS_CODES} = $arg{'success_codes'} if($arg{'success_codes'}) ;
 	bless($self,$class);
 	return $self;
 }
@@ -62,6 +64,8 @@ You need to pass to the constructor a parameter 'codes' wich contain a hashref w
 			3 => "Remote file seems not exist\n"
 		}
 	);
+
+You can, optionnally, give to more parameters : success_codes and error_codes within the same format than codes. It'll allow you to control the current status via the is_success() and is_error() methods.
 
 =head1 FUNCTIONS
 
@@ -83,6 +87,8 @@ Return the explanation string of the current status.
 
 sub to_string {
 	my $self = shift;
+	return $self->{SUCCESS_CODES}->{$self->{CURRENT_CODE}} if($self->{SUCCESS_CODES}->{$self->{CURRENT_CODE}}) ;
+	return $self->{ERROR_CODES}->{$self->{CURRENT_CODE}} if($self->{ERROR_CODES}->{$self->{CURRENT_CODE}}) ;
 	return $self->{CODES}->{$self->{CURRENT_CODE}} ;
 }
 
@@ -97,29 +103,49 @@ sub to_int {
 	return $self->{CURRENT_CODE} ;
 }
 
-=head2 to_XML
+=head2 to_XML (deprecated)
+
+Same as to_xml(), provided for backward compatibility.
+
+=cut
+
+sub to_XML {
+	return to_xml(@_);
+}
+
+=head2 to_xml
 
 return an xml ecoded string, represented the current status. The XML string will be like that :
 
 	<status code="0" description="All goes well" />
 
-	$xml_file->Add($status->to_XML) ;
+	$xml_file->Add($status->to_xml) ;
 
 =cut
 
-sub to_XML
+sub to_xml
 {
 	my $self = shift ;
 	return "<status code=\"".$self->to_int()."\" description=\"".$self->to_string()."\" />";
 }
 
-=head2 to_HTML
+=head2 to_HTML (deprecated)
+
+Same as to_html(), provided for backward compatibility.
+
+=cut
+
+sub to_HTML {
+	return to_html(@_);
+}
+
+=head2 to_html
 
 return the status as an HTML encoded string
 
 =cut
 
-sub to_HTML
+sub to_html
 {
 	my $self = shift ;
 	return "<p id=\"status\"><h3>Status</h3><strong>code :</strong> ".$self->to_int()."<br/><strong>description :</strong> ".$self->to_string()."<br/>\n</p>\n";
@@ -148,6 +174,7 @@ sub current
 	{
 		if($code=~ /^\d+$/)
 		{
+			print "[Slackware::Slackget::Status] (debug) setting current status code to $code.\n" if($ENV{SG_DAEMON_DEBUG});
 			$self->{CURRENT_CODE} = $code;
 			return 1;
 		}
@@ -157,6 +184,31 @@ sub current
 			return undef;
 		}
 	}
+}
+
+=head2 is_success
+
+return true (1) if the current() code is declared as a success code (constructor's parameter: success_codes). Return false otherwise (particularly if you have only set codes and not success_codes).
+
+=cut
+
+sub is_success {
+	my $self = shift;
+	return 1 if($self->{SUCCESS_CODES}->{$self->{CURRENT_CODE}});
+	return 0;
+}
+
+
+=head2 is_error
+
+return true (1) if the current() code is declared as an error code (constructor's parameter: error_codes). Return false otherwise (particularly if you have only set codes and not error_codes).
+
+=cut
+
+sub is_error {
+	my $self = shift;
+	return 1 if($self->{ERROR_CODES}->{$self->{CURRENT_CODE}});
+	return 0;
 }
 
 =head1 AUTHOR
@@ -175,7 +227,7 @@ your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Slackware::Slackget
+    perldoc Slackware::Slackget::Status
 
 
 You can also look for information at:
@@ -184,7 +236,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

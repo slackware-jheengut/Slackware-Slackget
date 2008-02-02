@@ -187,22 +187,31 @@ sub get_date {
 	return $self->{METADATA}->{'date'} ;
 }
 
+=head2 to_XML (deprecated)
 
-=head2 to_XML
-
-return the package as an XML encoded string.
-
-	$xml = $package->to_XML();
+Same as to_xml(), provided for backward compatibility.
 
 =cut
 
-sub to_XML
+sub to_XML {
+	return to_xml(@_);
+}
+
+=head2 to_xml
+
+return the package as an XML encoded string.
+
+	$xml = $package->to_xml();
+
+=cut
+
+sub to_xml
 {
 	my $self = shift;
 	my $xml = "<packages>\n";
 	foreach (keys(%{$self->{DATA}})){
 # 		print "XMLization of $_\n";
-		$xml .= $self->{DATA}->{$_}->to_XML ;
+		$xml .= $self->{DATA}->{$_}->to_xml ;
 	}
 	$xml .= "</packages>\n";
 	return $xml;
@@ -233,7 +242,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

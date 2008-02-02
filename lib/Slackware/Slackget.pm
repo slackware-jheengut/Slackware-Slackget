@@ -14,11 +14,11 @@ Slackware::Slackget - The main slack-get 1.0 library
 
 =head1 VERSION
 
-Version 0.14
+Version 0.15_99
 
 =cut
 
-our $VERSION = '0.14';
+our $VERSION = '0.15_99';
 
 =head1 SYNOPSIS
 
@@ -36,9 +36,6 @@ This module is still pre-in alpha development phase and I release it on CPAN onl
 	-version => '1.0.1228'
     );
 
-    $sgo->log()->Log(1,"A log message") ;
-
-
 =cut
 
 =head1 CONSTRUCTOR
@@ -50,8 +47,8 @@ The constructor (new()), is used to instanciate all needed class for a slack-get
 You have to pass the followings arguments to the constructor :
 
 	-config => the name of the configuration file.
-	-name => the name of the application wich create 
-	-version => the version of the calling program
+	-name => ignored : for backward compatibility
+	-version => ignored : for backward compatibility
 
 -name and -version arguments are passed to the constructor of the Slackware::Slackget::Log object.
 
@@ -66,8 +63,6 @@ sub new {
 	}
 	my %args = @_ ;
 	die "FATAL: You must pass a configuration file as -config parameter.\n" if(!defined($args{'-config'}) || ! -e $args{'-config'}) ;
-	die "FATAL: You must pass a name for this instance of Slackware::Slackget via the -name parameter.\n" if(!defined($args{'-name'})) ;
-	die "FATAL: You must pass a version to this constructor via the -version parameter.\n" if(!defined($args{'-version'})) ;
 	$self->{'config'} = new Slackware::Slackget::Config ( $args{'-config'} )  or die "FATAL: error during configuration file parsing\n$!\n" ;
 	$self->{'base'} = new Slackware::Slackget::Base ( $self->{'config'} );
 	$self->{'pkgtools'} = new Slackware::Slackget::PkgTools ( $self->{'config'} );

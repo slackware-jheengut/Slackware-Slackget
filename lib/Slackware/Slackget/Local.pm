@@ -26,8 +26,8 @@ This class' purpose is to load and export the local.
     use Slackware::Slackget::Local;
 
     my $local = Slackware::Slackget::Local->new();
-    $local->Load('/usr/local/share/slack-get/local/french.xml');
-    print $local->Get('__SETTINGS') ;
+    $local->load('/usr/local/share/slack-get/local/french.xml');
+    print $local->get('__SETTINGS') ;
 
 =cut
 
@@ -55,17 +55,27 @@ Can take an argument : the LC_MESSAGES file. In this case the constructor automa
 
 =head1 FUNCTIONS
 
-=head2 Load
+=head2 Load (deprecated)
+
+Same as load(), provided for backward compatibility.
+
+=cut
+
+sub Load {
+	return load(@_);
+}
+
+=head2 load
 
 Load the local from a given file
 
-	$local->Load('/usr/local/share/slack-get/local/french.xml') or die "unable to load local\n";
+	$local->load('/usr/local/share/slack-get/local/french.xml') or die "unable to load local\n";
 
 Return undef if something goes wrong, 1 else.
 
 =cut
 
-sub Load {
+sub load {
 	my ($self,$file) = @_ ;
 	return undef unless(defined($file) && -e $file);
 	print "[Slackware::Slackget::Local] loading file \"$file\"\n";
@@ -96,11 +106,21 @@ sub get_indexes
 	return wantarray ? @a : \@a;
 }
 
-=head2 Get
+=head2 Get (deprecated)
+
+Same as get(), provided for backward compatibility.
+
+=cut
+
+sub Get {
+	return get(@_);
+}
+
+=head2 get
 
 Return the localized message of a given token :
 
-	my $error_on_modification = $local->Get('__ERR_MOD') ;
+	my $error_on_modification = $local->get('__ERR_MOD') ;
 
 Return undef if the token doesn't exist.
 
@@ -110,14 +130,14 @@ Here is and example :
  
 	# The token is :
 	# __NETWORK_CONNECTION_ERROR = Error, cannot connect to %1, the server said ``%2''.
-	my $localized_token = $local->Get('__NETWORK_CONNECTION_ERROR', '192.168.0.42', 'Connection not authorized');
+	my $localized_token = $local->get('__NETWORK_CONNECTION_ERROR', '192.168.0.42', 'Connection not authorized');
 	print "$localized_token\n";
 	# $localized_token contains the string "Error, cannot connect to 192.168.0.42, the server said ``Connection not authorized''."
 
 
 =cut
 
-sub Get {
+sub get {
 	my ($self,$token,@args) = @_ ;
 	if(@args)
 	{
@@ -135,7 +155,17 @@ sub Get {
 	}
 }
 
-sub to_XML
+=head2 to_XML (deprecated)
+
+Same as to_xml(), provided for backward compatibility.
+
+=cut
+
+sub to_XML {
+	return to_xml(@_);
+}
+
+sub to_xml
 {
 	my $self = shift;
 	my @msg = sort {$a cmp $b} keys(%{ $self->{DATA} });
@@ -185,7 +215,7 @@ your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Slackware::Slackget
+    perldoc Slackware::Slackget::Local
 
 
 You can also look for information at:
@@ -194,7 +224,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

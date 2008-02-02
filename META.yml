@@ -1,6 +1,6 @@
 ---
 name: Slackware-Slackget
-version: 0.14
+version: 0.15_99
 author:
   - 'Arnaud DUPUIS <a.dupuis@infinityperl.org>'
 abstract: The main slack-get 1.0 library
@@ -15,18 +15,18 @@ build_requires:
   HTTP::Status: '>= 1.28'
   LWP::Simple: '>= 1.41'
   Net::FTP: '>= 2.75'
-  POE: 0
-  POE::Component::Logger: 0
+  POE: 0.9999
+  POE::Component::Logger: 1.0
   Proc::Daemon: 0
-  Test::More: 0
+  Test::More: 0.70
   Time::HiRes: '>= 1.66'
   XML::Parser: 0
-  XML::Simple: 0
+  XML::Simple: 2.18
   perl: '>= 5.8.5'
 provides:
   Slackware::Slackget:
     file: lib/Slackware/Slackget.pm
-    version: 0.14
+    version: 0.15_99
   Slackware::Slackget::Base:
     file: lib/Slackware/Slackget/Base.pm
     version: 1.0.3
@@ -35,16 +35,16 @@ provides:
     version: 1.0.0
   Slackware::Slackget::Date:
     file: lib/Slackware/Slackget/Date.pm
-    version: 1.0.0
+    version: 1.0.1
   Slackware::Slackget::File:
     file: lib/Slackware/Slackget/File.pm
-    version: 1.0.3
+    version: 1.0.4
   Slackware::Slackget::GPG:
     file: lib/Slackware/Slackget/GPG.pm
     version: 0.1
   Slackware::Slackget::GPG::Signature:
     file: lib/Slackware/Slackget/GPG/Signature.pm
-    version: 0.1
+    version: 0.5
   Slackware::Slackget::List:
     file: lib/Slackware/Slackget/List.pm
     version: 1.0.0
@@ -66,9 +66,21 @@ provides:
   Slackware::Slackget::Network::Auth:
     file: lib/Slackware/Slackget/Network/Auth.pm
     version: 1.0.0
+  Slackware::Slackget::Network::Backend::Base64:
+    file: lib/Slackware/Slackget/Network/Backend/Base64.pm
+    version: 0.8.0
+  Slackware::Slackget::Network::Backend::Bzip2:
+    file: lib/Slackware/Slackget/Network/Backend/Bzip2.pm
+    version: 0.8.0
+  Slackware::Slackget::Network::Backend::Gzip:
+    file: lib/Slackware/Slackget/Network/Backend/Gzip.pm
+    version: 0.8.1
+  Slackware::Slackget::Network::Backend::TEST:
+    file: lib/Slackware/Slackget/Network/Backend/TEST.pm
+    version: 0.8.0
   Slackware::Slackget::Network::Backend::XML:
     file: lib/Slackware/Slackget/Network/Backend/XML.pm
-    version: 0.8.0
+    version: 0.9.0
   Slackware::Slackget::Network::Connection:
     file: lib/Slackware/Slackget/Network/Connection.pm
     version: 1.0.0
@@ -86,13 +98,13 @@ provides:
     version: 0.9.1
   Slackware::Slackget::Package:
     file: lib/Slackware/Slackget/Package.pm
-    version: 1.0.2
+    version: 1.0.3
   Slackware::Slackget::PackageList:
     file: lib/Slackware/Slackget/PackageList.pm
     version: 1.0.0
   Slackware::Slackget::PkgTools:
     file: lib/Slackware/Slackget/PkgTools.pm
-    version: 1.0.0
+    version: 1.0.1
   Slackware::Slackget::Search:
     file: lib/Slackware/Slackget/Search.pm
     version: 1.0.0
@@ -113,7 +125,7 @@ provides:
     version: 1.0.0
   Slackware::Slackget::Status:
     file: lib/Slackware/Slackget/Status.pm
-    version: 1.0.0
+    version: 1.0.99
 generated_by: Module::Build version 0.2808
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html

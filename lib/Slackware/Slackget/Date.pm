@@ -2,6 +2,10 @@ package Slackware::Slackget::Date;
 
 use warnings;
 use strict;
+use overload 
+	'cmp' => \&compare_ng,
+	'<=>' => \&compare_ng,
+	'fallback' => 1;
 
 =head1 NAME
 
@@ -9,11 +13,11 @@ Slackware::Slackget::Date - A class to manage date for slack-get.
 
 =head1 VERSION
 
-Version 1.0.0
+Version 1.0.1
 
 =cut
 
-our $VERSION = '1.0.0';
+our $VERSION = '1.0.1';
 
 =head1 SYNOPSIS
 
@@ -40,7 +44,7 @@ The constructor take the followings arguments :
 	month-name  => the month name (Jan, Feb, Apr, etc.)
 	month-number => the month number (1 to 12)
 	hour => the hour ( a string like : 12:52:00). The separator MUST BE ':'
-	year => a chicken name...no it's a joke the year (ex: 2005).
+	year => a chicken name...no it's a joke. The year as integer (ex: 2005).
 	use-approximation => in this case the comparisons method just compare the followings : day, month and year. (default: no)
 
 You have to manage by yourself the date validity, because this class doesn't check the date validity. The main reason of this, is that this class is use to compare the date of specials files. 
@@ -73,6 +77,9 @@ my %equiv_month = (
 	'Nov' => 11,
 	'Dec' => 12,
 );
+
+my @equiv_month = ('Non','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec');
+
 
 sub new
 {
@@ -162,6 +169,22 @@ sub compare {
 	return 0;
 }
 
+=head2 compare_ng
+
+This method behave exactly the same way than compare() but is compliant with '<=>' and 'cmp' Perl operators.
+
+Instead of returning 2 if left operand is lesser than the right one, it return -1.
+
+The purpose of not modifying compare() directly is the backward compatibility.
+
+=cut
+
+sub compare_ng {
+	my $r = compare(@_);
+	return -1 if($r == 2);
+	return $r;
+}
+
 =head2 is_equal
 
 Take another date object as parameter and return TRUE (1) if this two date object are equal (if compare() return 0), and else return false (0).
@@ -204,6 +227,15 @@ sub _fill_undef {
 			$self->{DATE}->{'month-number'} = 0;
 		}
 	}
+	unless(defined($self->{DATE}->{'month-name'})){
+		if(defined($self->{DATE}->{'month-number'}) && defined($equiv_month[$self->{DATE}->{'month-number'}]))
+		{
+			$self->{DATE}->{'month-name'} = $equiv_month[$self->{DATE}->{'month-number'}];
+		}
+		else{
+			$self->{DATE}->{'month-name'} = 'Non';
+		}
+	}
 	$self->{DATE}->{'day-number'} = 0 unless(defined($self->{DATE}->{'day-number'}));
 	$self->{DATE}->{'year'} = 0 unless(defined($self->{DATE}->{'year'}));
 }
@@ -230,15 +262,15 @@ sub today
 	$self->{DATE}->{'hour'} = $hour;
 }
 
-=head2 to_XML
+=head2 to_xml
 
 return the date as an XML encoded string.
 
-	$xml = $date->to_XML();
+	$xml = $date->to_xml();
 
 =cut
 
-sub to_XML
+sub to_xml
 {
 	my $self = shift;
 	my $xml = "<date ";
@@ -249,15 +281,26 @@ sub to_XML
 	return $xml;
 }
 
-=head2 to_HTML
+=head2 to_XML (deprecated)
 
-return the date as an HTML encoded string.
-
-	$xml = $date->to_HTML();
+same as to_xml() provided for backward compatibility.
 
 =cut
 
-sub to_HTML
+sub to_XML {
+	return to_xml(@_);
+}
+
+
+=head2 to_html
+
+return the date as an HTML encoded string.
+
+	$xml = $date->to_html();
+
+=cut
+
+sub to_html
 {
 	my $self = shift;
 	my $xml = "<strong>Date :</strong> $self->{DATE}->{'day-number'}/$self->{DATE}->{'month-number'}/$self->{DATE}->{'year'} $self->{DATE}->{'hour'}<br/>\n";
@@ -266,6 +309,16 @@ sub to_HTML
 # 	}
 # 	$xml .= "</p>\n";
 	return $xml;
+}
+
+=head2 to_HTML (deprecated)
+
+same as to_html() provided for backward compatibility.
+
+=cut
+
+sub to_HTML {
+	return to_html(@_);
 }
 
 =head2 to_string
@@ -389,7 +442,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

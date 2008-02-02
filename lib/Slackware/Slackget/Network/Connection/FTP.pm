@@ -6,6 +6,7 @@ use strict;
 require Slackware::Slackget::Network::Connection ;
 use Time::HiRes ;
 require Net::FTP ;
+require File::Copy;
 require Slackware::Slackget::File ;
 
 =head1 NAME
@@ -207,8 +208,9 @@ sub __fetch_file {
 		0 => "All goes well.\n",
 		1 => "An error occured, we recommend to change this server's host.\n"
 	});
-	if($self->conn->get($remote_file,$local_file))
+	if($self->conn->get($remote_file,$local_file.'.part'))
 	{
+		File::Copy::move( $local_file.'.part' , $local_file );
 		$state->current(0);
 	}
 	else

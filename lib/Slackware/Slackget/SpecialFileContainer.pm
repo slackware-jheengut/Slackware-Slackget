@@ -142,15 +142,25 @@ sub id {
 	return $self->{ROOT} ;
 }
 
-=head2 to_XML
+=head2 to_XML (deprecated)
 
-return a string XML encoded which represent the compilation of PACKAGES, FILELIST, CHECKSUMS constructor parameters.
-
-	my $string = $container->to_XML();
+Same as to_xml(), provided for backward compatibility.
 
 =cut
 
 sub to_XML {
+	return to_xml(@_);
+}
+
+=head2 to_xml
+
+return a string XML encoded which represent the compilation of PACKAGES, FILELIST, CHECKSUMS constructor parameters.
+
+	my $string = $container->to_xml();
+
+=cut
+
+sub to_xml {
 	my $self = shift;
 	my $xml = "  <$self->{ROOT}>\n";
 # 	print "\t[$self] XMLization of the $self->{DATA}->{PACKAGELIST} packagelist\n";
@@ -175,7 +185,7 @@ your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Slackware::Slackget
+    perldoc Slackware::Slackget::SpecialFileContainer
 
 
 You can also look for information at:
@@ -184,7 +194,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

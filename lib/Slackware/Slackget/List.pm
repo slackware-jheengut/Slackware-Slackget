@@ -144,15 +144,25 @@ sub Shift {
 	}
 }
 
-=head2 to_XML
+=head2 to_XML (deprecated)
 
-return an XML encoded string.
-
-	$xml = $list->to_XML();
+Same as to_xml(), provided for backward compatibility.
 
 =cut
 
-sub to_XML
+sub to_XML {
+	return to_xml(@_);
+}
+
+=head2 to_xml
+
+return an XML encoded string.
+
+	$xml = $list->to_xml();
+
+=cut
+
+sub to_xml
 {
 	my $self = shift;
 	my $xml = "";
@@ -160,26 +170,38 @@ sub to_XML
 	$self->{ENCODING} = uc($self->{ENCODING}) ; # NOTE: check if it do not screw up
 	$xml .= "<?xml version=\"1.0\" encoding=\"$self->{ENCODING}\" standalone=\"yes\"?>\n<$self->{'root-tag'}>\n" if(!defined($self->{'no-root-tag'}) && defined($self->{'root-tag'}));
 	foreach (@{$self->{LIST}}){
-		$xml .= $_->to_XML();
+		$xml .= $_->to_xml();
 	}
 	$xml .= "</$self->{'root-tag'}>\n" if(!defined($self->{'no-root-tag'}) && defined($self->{'root-tag'}));
 	return $xml;
 }
 
-=head2 to_HTML
 
-return an HTML encoded string.
+=head2 to_HTML (deprecated)
 
-	$xml = $list->to_HTML();
+Same as to_html(), provided for backward compatibility.
 
 =cut
 
-sub to_HTML
+sub to_HTML {
+	return to_html(@_);
+}
+
+
+=head2 to_html
+
+return an HTML encoded string.
+
+	$xml = $list->to_html();
+
+=cut
+
+sub to_html
 {
 	my $self = shift;
 	my $xml = '<ul>';
 	foreach (@{$self->{LIST}}){
-		$xml .= $_->to_HTML();
+		$xml .= $_->to_html();
 	}
 	$xml .= '</ul>';
 	return $xml;
@@ -187,13 +209,13 @@ sub to_HTML
 
 =head2 to_string
 
-Alias for to_XML()
+Alias for to_xml()
 
 =cut
 
 sub to_string{
 	my $self = shift;
-	$self->to_XML();
+	$self->to_xml();
 }
 
 =head2 Length
@@ -244,7 +266,7 @@ your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Slackware::Slackget
+    perldoc Slackware::Slackget::List
 
 
 You can also look for information at:
@@ -253,7 +275,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

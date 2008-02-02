@@ -155,9 +155,11 @@ TIPS: you can restrict the search domain by providing fields with restrictions, 
 sub search_package_multi_fields {
 	my ($self,$string,@fields)=@_;
 	my @result;
+# 	print STDERR "[Slackware::Slackget::Search->search_package_multi_fields()] (debug) begin the search.\n";
 	foreach (@{$self->{PKGLIST}->get_all()}){
 		foreach my $field (@fields)
 		{
+# 			print STDERR "[Slackware::Slackget::Search->search_package_multi_fields()] (debug) compare \"$string\" with package ".$_->get_id()." field $field (".$_->getValue($field).")\n";
 			if($field=~ /^([^=]+)=(.+)/)
 			{
 				if(defined($_->getValue($1)) && $_->getValue($1) ne $2)
@@ -270,7 +272,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

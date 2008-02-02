@@ -94,14 +94,15 @@ sub compile {
 		);
 	}
 	foreach ($self->{FILE}->Get_file()){
-		next if($_=~ /\.asc$/);
+		chomp;
+		next if($_=~ /\.asc\s*\n*$/i);
 		
 		if(my @m=$_=~/^([^\s]+)\s+(\d+)\s+(\w+)\s+(\w+)\s+(\d+)\s+(\d+)-(\d+)-(\d+)\s+(\d+):(\d+)\s+\.\/(.*)\/(.*)\.tgz\s*\n*$/gi){#(\d+)-(\d+)-(\d+)\s+(\d+):(\d+)\s+\.\/(.*)\/([^\/\s\n]*)\.tgz
 			#        1          2       3       4       5       6     7      8      9     10         11    12
-			$m[10].='/'; # a fuckng bad hack :(
+			$m[10].='/'; # a fucking bad hack :(
 			next if ($m[10]=~ /(source|src)\//);
 # 			print "matching $m[11] : \n\t",join ' ; ',@m,"\n\n";
-			$self->{DATA}->{$m[11]} = new Slackware::Slackget::Package ($m[11]);
+			$self->{DATA}->{$m[11]} = new Slackware::Slackget::Package ( $m[11] );
 			$self->{DATA}->{$m[11]}->setValue('package-source',$self->{ROOT}) if($self->{ROOT});
 			$self->{DATA}->{$m[11]}->setValue('package-location',$m[10]);
 			$self->{DATA}->{$m[11]}->setValue('compressed-size',int($m[4]/1024));
@@ -115,7 +116,7 @@ sub compile {
 # 			print "\nPAUSE\n";<STDIN>;
 		}
 		elsif($_=~/\.tgz/i){
-			warn "Skipping $1 even if it's a .tgz\n";
+			warn "Skipping $_ even if it's a .tgz (source: $self->{ROOT})\n";
 		}
 	}
 	$self->{FILE}->Close();
@@ -181,17 +182,27 @@ sub get_date {
 	return $self->{METADATA}->{'date'} ;
 }
 
-=head2 to_XML
+=head2 to_XML (deprecated)
+
+Same as to_xml(), provided for backward compatibility.
+
+=cut
+
+sub to_XML {
+	return to_xml(@_);
+}
+
+=head2 to_xml
 
 return a string containing all packages name carriage return separated.
 
 WARNING: ONLY FOR DEBUG
 
-	my $string = $list->to_string();
+	my $string = $list->to_xml();
 
 =cut
 
-sub to_XML {
+sub to_xml {
 	my $self = shift;
 	my $xml = "<filelist>\n";
 	foreach (keys(%{$self->{DATA}})){
@@ -201,15 +212,25 @@ sub to_XML {
 	return $xml;
 }
 
-=head2 meta_to_XML
+=head2 meta_to_XML (deprecated)
 
-Return an XML encoded string which represent the meta informations of the FILELIST.TXT file.
-
-	my $xml_string = $list->meta_to_XML ;
+Same as meta_to_xml(), provided for backward compatibility.
 
 =cut
 
-sub meta_to_XML
+sub meta_to_XML {
+	return meta_to_xml(@_);
+}
+
+=head2 meta_to_xml
+
+Return an XML encoded string which represent the meta informations of the FILELIST.TXT file.
+
+	my $xml_string = $list->meta_to_xml ;
+
+=cut
+
+sub meta_to_xml
 {
 	my $self = shift;
 	my $xml = "\t<filelist>\n";
@@ -243,7 +264,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 

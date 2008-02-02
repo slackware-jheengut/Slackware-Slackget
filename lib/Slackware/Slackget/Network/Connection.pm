@@ -16,7 +16,7 @@ Version 1.0.0
 
 our $VERSION = '1.0.0';
 our $ENABLE_DEPRECATED_COMPATIBILITY_MODE=0;
-our $DEBUG=0;
+our $DEBUG= $ENV{SG_DAEMON_DEBUG};
 
 # my %equiv = (
 # 	'normal' => 'IO::Socket::INET',
@@ -35,7 +35,11 @@ This class is anoter wrapper for slack-get. It will encapsulate all network oper
 
 WARNING: The Slackware::Slackget::Network::Connection::* "drivers" API changed with version 1.0.0
 
-This class use subclass like Slackware::Slackget::Network::Connection::HTTP or Slackware::Slackget::Network::Connection::FTP as "drivers" for a specific protocol. You can add a "driver" class for a new protocol easily by creating a module in the Slackware::Slackget::Network::Connection:: namespace. You must know that all class the Slackware::Slackget::Network::Connection::* must implements the following methods (the format is : <method name(<arguments>)> : <returned value>, parmameters between [] are optionnals):
+This class use subclass like Slackware::Slackget::Network::Connection::HTTP or Slackware::Slackget::Network::Connection::FTP as "drivers" for a specific protocol. 
+
+You can add a "driver" class for a new protocol easily by creating a module in the Slackware::Slackget::Network::Connection:: namespace. 
+
+You must know that all class the Slackware::Slackget::Network::Connection::* must implements the following methods (the format is : <method name(<arguments>)> : <returned value>, parmameters between [] are optionnals):
 
 	- __test_server : a float (the server response time)
 	- __fetch_file([$remote_filename],[$local_file]) : a boolean (1 or 0). NOTE: this method store the fetched file on the hard disk. If $local_file is not defined, fetch() must store the file in <config:update-directory> or in "download_directory" (constructor parameter).
@@ -215,7 +219,7 @@ Take a string as argument and return TRUE (1) if $string is an http or ftp URL a
 
 sub is_url {
 	my ($self,$url)=@_;
-	if( $self->can('_validate_url') ){
+	if( defined($self) && $self->can('_validate_url') ){
 		if( $self->_validate_url($url) ){
 			return 1;
 		}
@@ -261,25 +265,29 @@ sub parse_url {
 	{
 		$self->{DATA}->{protocol} = 'file';
 		$self->{DATA}->{file} = $1;
-# 		print "[debug] file is set to $self->{DATA}->{file} fo object $self\n";
+		print "[Slackware::Slackget::Network::Connection] [debug] file is set to $self->{DATA}->{file} fo object $self\n" if($DEBUG);
 		#if we can extract a file name and a directory path we do.
 		if(defined($self->{DATA}->{file}) && $self->{DATA}->{file}=~ /^(.+\/)([^\/]*)$/i)
 		{
 			$self->{DATA}->{path} = $1;
-# 			print "[debug] path is set to $self->{DATA}->{path} fo object $self\n";
 			$self->{DATA}->{file} = $2;
-# 			print "[debug] file is set to $self->{DATA}->{file} fo object $self\n";
+			if($DEBUG){
+				print "[Slackware::Slackget::Network::Connection] [debug] path is set to $self->{DATA}->{path} fo object $self\n";
+				print "[Slackware::Slackget::Network::Connection] [debug] file is set to $self->{DATA}->{file} fo object $self\n";
+			}
 		}
 		return undef unless($self->{DATA}->{path});
 		return 1;
 	}
 	elsif(my @tmp = $url=~ /^(.+):\/\/([^\/]+){1}(\/.*)?$/){
 		$self->{DATA}->{protocol} = $1;
-# 		print "[debug] setting host to : $2\n";
 		$self->{DATA}->{host} = $2;
-# 		print "[debug] host is set to $self->{DATA}->{host} fo object $self\n";
 		$self->{DATA}->{file} = $3;
-# 		print "[debug] file is set to $self->{DATA}->{file} fo object $self\n";
+		if($DEBUG){
+			print "[Slackware::Slackget::Network::Connection] [debug] protocol is set to $self->{DATA}->{protocol} fo object $self\n";
+			print "[Slackware::Slackget::Network::Connection] [debug] host is set to $self->{DATA}->{host} fo object $self\n";
+			print "[Slackware::Slackget::Network::Connection] [debug] file is set to $self->{DATA}->{file} fo object $self\n";
+		}
 		#if we can extract a file name and a directory path we do.
 		if(defined($self->{DATA}->{file}) && $self->{DATA}->{file}=~ /^(.*\/)([^\/]*)$/i)
 		{
@@ -629,7 +637,7 @@ You can also look for information at:
 
 =item * Infinity Perl website
 
-L<http://www.infinityperl.org>
+L<http://www.infinityperl.org/category/slack-get>
 
 =item * slack-get specific website
 
