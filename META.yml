@@ -1,6 +1,6 @@
 ---
 name: Slackware-Slackget
-version: 0.15_99
+version: 0.16
 author:
   - 'Arnaud DUPUIS <a.dupuis@infinityperl.org>'
 abstract: The main slack-get 1.0 library
@@ -26,19 +26,19 @@ build_requires:
 provides:
   Slackware::Slackget:
     file: lib/Slackware/Slackget.pm
-    version: 0.15_99
+    version: 0.16
   Slackware::Slackget::Base:
     file: lib/Slackware/Slackget/Base.pm
     version: 1.0.3
   Slackware::Slackget::Config:
     file: lib/Slackware/Slackget/Config.pm
-    version: 1.0.0
+    version: 1.0.1
   Slackware::Slackget::Date:
     file: lib/Slackware/Slackget/Date.pm
     version: 1.0.1
   Slackware::Slackget::File:
     file: lib/Slackware/Slackget/File.pm
-    version: 1.0.4
+    version: 1.0.5
   Slackware::Slackget::GPG:
     file: lib/Slackware/Slackget/GPG.pm
     version: 0.1
@@ -47,7 +47,7 @@ provides:
     version: 0.5
   Slackware::Slackget::List:
     file: lib/Slackware/Slackget/List.pm
-    version: 1.0.0
+    version: 1.0.1
   Slackware::Slackget::Local:
     file: lib/Slackware/Slackget/Local.pm
     version: 1.0.0

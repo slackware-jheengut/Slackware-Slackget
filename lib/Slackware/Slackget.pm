@@ -14,11 +14,11 @@ Slackware::Slackget - The main slack-get 1.0 library
 
 =head1 VERSION
 
-Version 0.15_99
+Version 0.16
 
 =cut
 
-our $VERSION = '0.15_99';
+our $VERSION = '0.16';
 
 =head1 SYNOPSIS
 
@@ -26,7 +26,7 @@ slack-get (http://slackget.infinityperl.org and now http://www.infinityperl.org/
 
 The name Slackware::Slackget means slack-get 1.0 because this module is complely new and is for the 1.0 release. It is entierely object oriented, and require some other modules (like XML::Simple, Net::Ftp and LWP::Simple).
 
-This module is still pre-in alpha development phase and I release it on CPAN only for coder which want to see the new architecture. For more informations, have a look on subclasses.
+This module is still beta development version and I release it on CPAN only for coder which want to see the new architecture. For more informations, have a look on subclasses.
 
     use Slackware::Slackget;
 

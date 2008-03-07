@@ -86,3 +86,10 @@ Revision history for Slackware::Slackget
 		* Slackware::Slackget::Media (SGNCC & backward compatible)
 		* Slackware::Slackget::Date (SGNCC & backward compatible)
 		* Slackware::Slackget::Package (SGNCC & backward compatible)
+
+0.16  
+	- code cleanup for the Slackware::Slackget::List class
+	- fix some "uninitialized value" problem in the Slackware::Slackget::File class
+	- the bug with `file` -b option on Solaris should be fixed.
+	- add more tests to the test suite for the followings classes :
+		* Slackware::Slackget::List (SGNCC & backward compatible)

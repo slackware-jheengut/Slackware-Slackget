@@ -12,7 +12,7 @@ $file->filename('bar.txt');
 ok( $file->filename eq 'bar.txt' );
 $file->Write() ;
 ok( -e 'bar.txt' );
-my $file2 = Slackware::Slackget::File->new('bar.txt');
+my $file2 = Slackware::Slackget::File->new('bar.txt', 'load-raw' => 1);
 ok( $file->Get_line(0) eq $file2->Get_line(0) );
 ok( $file->Lock_file() );
 ok( $file2->Unlock_file() == 0 );

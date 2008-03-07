@@ -65,6 +65,8 @@ sub new
 
 This class inheritate from Slackware::Slackget::List (L<Slackware::Slackget::List>), so you may want read the Slackware::Slackget::List documentation for the supported methods of this class.
 
+The present documentation present only methods that differs from the Slackware::Slackget::List class.
+
 =cut
 
 =head2 fill_from_xml

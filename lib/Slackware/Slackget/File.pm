@@ -9,11 +9,11 @@ Slackware::Slackget::File - A class to manage files.
 
 =head1 VERSION
 
-Version 1.0.4
+Version 1.0.5
 
 =cut
 
-our $VERSION = '1.0.4';
+our $VERSION = '1.0.5';
 
 =head1 SYNOPSIS
 
@@ -35,6 +35,8 @@ The main advantage of this module is that you don't work directly on the file bu
 
 ** ATTENTION ** this module can fail to load file on non-UNIX system because it rely on the "file" and "awk" command line tools. Be sure to use the 'load-raw' => 1 constructor's option on such operating system (most probably the file type will be blank and no problem will happen... but it's still a possibility).
 
+** ATTENTION 2 ** this module rely on bzip2 and gzip command line tools to uncompress the compressed files. On systems which does not support the `gzip -dc` or `bzip2 -dc`, trying to load compressed files will cause crashs, which can eventually lead to the end of the world...
+
 =cut
 
 sub new
@@ -46,10 +48,24 @@ sub new
 	$self->{'file-encoding'} = 'utf8' unless(defined($self->{'file-encoding'}));
 	if(defined($file) && -e $file && !defined($args{'load-raw'}))
 	{
-		$self->{TYPE} = `LC_ALL=C file -b $file | awk '{print \$1}'`;
-		chomp $self->{TYPE};
+		eval {
+			$self->{TYPE} = `LC_ALL=C file -b $file | awk '{print \$1}'`;
+			chomp $self->{TYPE};
+		};
+		if($@){
+			$self->{TYPE} = `LC_ALL=C file $file | awk '{print \$2}'`;
+			chomp $self->{TYPE};
+			if($@){
+				$self->{TYPE} = 'none' ; # Empty the file type if the `file` syscall failed
+				$args{'load-raw'}=1; # and set option to load it raw
+			}
+		}
+		$self->{TYPE} = 'none' unless(defined($self->{TYPE}));
 		$self->{TYPE} = 'ASCII' if($self->{TYPE} eq 'empty');
-		die "[Slackware::Slackget::File::constructor] unsupported file type \"$self->{TYPE}\" for file $file. Supported file type are gzip, bzip2, ASCII and XML\n" unless($self->{TYPE} eq 'gzip' || $self->{TYPE} eq 'bzip2' || $self->{TYPE} eq 'ASCII' || $self->{TYPE} eq 'XML' || $self->{TYPE} eq 'Quake') ;
+		$self->{TYPE} = 'ASCII' if($self->{TYPE} eq 'XML' || $self->{TYPE} eq 'Quake');
+		die "[Slackware::Slackget::File::constructor] unsupported file type \"$self->{TYPE}\" for file $file. Supported file type are gzip, bzip2, ASCII and XML\n" unless($self->{TYPE} eq 'gzip' || $self->{TYPE} eq 'bzip2' || $self->{TYPE} eq 'ASCII' || $self->{TYPE} eq 'XML' || $self->{TYPE} eq 'none') ;
+	}else{
+		$self->{TYPE} = 'ASCII' ;
 	}
 # 	print "using $self->{'file-encoding'} as file-encoding for file $file\n";
 	$self->{FILENAME} = $file;
@@ -59,7 +75,7 @@ sub new
 	$self->{BINARY} = $args{'binary'} if($args{'binary'});
 	$self->{SKIP_WL} = $args{'skip-white-line'} if($args{'skip-white-line'});
 	$self->{SKIP_WL} = $args{'skip-white-lines'} if($args{'skip-white-lines'});
-	$self->{LOAD_RAW} = undef;
+	$self->{LOAD_RAW} = 0;
 	$self->{LOAD_RAW} = $args{'load-raw'} if($args{'load-raw'});
 	if(defined($file) && -e $file && !defined($self->{'no-auto-load'})){
 		$self->Read();
@@ -147,7 +163,7 @@ sub Read
 	}
 	my $tmp;
 	my @file = ();
-	if(defined($self->{TYPE}) && ($self->{TYPE} eq 'ASCII' || $self->{TYPE} eq 'XML' || $self->{TYPE} eq 'Quake') && !defined($self->{LOAD_RAW}))
+	if((defined($self->{TYPE}) && ($self->{TYPE} eq 'ASCII' || $self->{TYPE} eq 'XML' || $self->{TYPE} eq 'Quake') ) && !$self->{LOAD_RAW})
 	{
 # 		print "[DEBUG] [Slackware::Slackget::File] loading $file as 'plain text' file.";
 		if(open (F2,"<:encoding($self->{'file-encoding'})",$file))
@@ -180,7 +196,7 @@ sub Read
 			return undef;
 		}
 	}
-	elsif($self->{TYPE} eq 'bzip2' && !defined($self->{LOAD_RAW}))
+	elsif($self->{TYPE} eq 'bzip2' && !$self->{LOAD_RAW})
 	{
 # 		print "[DEBUG] [Slackware::Slackget::File] loading $file as 'bzip2' file.";
 # 		my $tmp_file = `bzip2 -dc $file`;
@@ -191,7 +207,7 @@ sub Read
 		$self->{FILE} = \@file ;
 		return 1;
 	}
-	elsif($self->{TYPE} eq 'gzip' && !defined($self->{LOAD_RAW}))
+	elsif($self->{TYPE} eq 'gzip' && !$self->{LOAD_RAW})
 	{
 # 		print "[DEBUG] [Slackware::Slackget::File] loading $file as 'gzip' file.";
 # 		my $tmp_file = `gzip -dc $file`;
@@ -202,7 +218,7 @@ sub Read
 		$self->{FILE} = \@file ;
 		return 1;
 	}
-	elsif(defined($self->{LOAD_RAW}) or $self->{TYPE} eq '')
+	elsif($self->{LOAD_RAW} or $self->{TYPE} eq '')
 	{
 # 		print "[DEBUG] [Slackware::Slackget::File] loading $file as 'raw' file.";
 		if(open(F2,$file))
@@ -385,7 +401,7 @@ sub Write
 	if(open (FILE, "$mode:encoding($self->{'file-encoding'})",$name))
 	{
 		binmode(FILE) if($self->{'BINARY'}) ;
-		# NOTE: In the case you need to clear the white line of your file, their will be a if() test no each array slot
+		# NOTE: In the case you need to clear the white line of your file, their will be a if() test for each array slot
 		# This is really time consumming, so id you don't need this feature we just test once for all and gain a lot in performance.
 		if($self->{SKIP_WL})
 		{
@@ -589,6 +605,18 @@ You can also set the filename :
 sub filename
 {
 	return $_[1] ? $_[0]->{FILENAME}=$_[1] : $_[0]->{FILENAME};
+}
+
+=head2 type (read only)
+
+Return the current file type.
+
+	print $file->type
+
+=cut
+
+sub type {
+	return $_[0]->{TYPE};
 }
 
 =head1 AUTHOR

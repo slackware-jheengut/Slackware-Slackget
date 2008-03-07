@@ -5,19 +5,21 @@ use strict;
 
 =head1 NAME
 
-Slackware::Slackget::List - This class is a general List class.
+Slackware::Slackget::List - A generic list abstraction.
 
 =head1 VERSION
 
-Version 1.0.0
+Version 1.0.1
 
 =cut
 
-our $VERSION = '1.0.0';
+our $VERSION = '1.0.1';
 
 =head1 SYNOPSIS
 
-This class is a container of Slackware::Slackget::Package object, and allow you to perform some operations on this packages list. As the Package class, it is a slack-get's internal representation of data.
+This class is a generic list abstraction. Most of the time it rely on Perl implementation of list operation, but it also implements some sanity checks.
+
+This class is mainly designed to be inherited from.
 
     use Slackware::Slackget::List;
 
@@ -85,7 +87,10 @@ Add the element passed in argument to the list. The argument must be an object o
 sub add {
 	my ($self,$pack) = @_ ;
 	
-	return undef if(ref($pack) ne "$self->{list_type}");
+# 	return undef if(ref($pack) ne "$self->{list_type}");
+	if(defined($self->{list_type}) ){
+		return undef unless(UNIVERSAL::isa($pack,$self->{list_type}));
+	}
 	push @{$self->{LIST}}, $pack;
 	return 1;
 }
