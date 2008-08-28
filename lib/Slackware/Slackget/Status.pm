@@ -9,11 +9,11 @@ Slackware::Slackget::Status - A class for returning a status code with its expla
 
 =head1 VERSION
 
-Version 1.0.99
+Version 1.0.100
 
 =cut
 
-our $VERSION = '1.0.99';
+our $VERSION = '1.0.100';
 
 =head1 SYNOPSIS
 
@@ -29,9 +29,13 @@ This class is used at a status object which can tell more informations to user. 
 	}
     );
     print "last error message was: ",$status->to_string,"\n";
-    if($status->to_int == 2)
+    if($status->is_error)
     {
-    	die "A network error occured\n";
+    	die "Error: ",$status->to_string,"\n";
+    }
+    elsif($status->is_success)
+    {
+    	print $status->to_string,"\n";
     }
 
 Please note that you must see at the documentation of a class to know the returned codes.
@@ -194,7 +198,11 @@ return true (1) if the current() code is declared as a success code (constructor
 
 sub is_success {
 	my $self = shift;
-	return 1 if($self->{SUCCESS_CODES}->{$self->{CURRENT_CODE}});
+# 	return 1 if($self->{SUCCESS_CODES}->{$self->{CURRENT_CODE}});
+	foreach my $code ( keys(%{$self->{SUCCESS_CODES}}) ){
+# 		print "[Slackware::Slackget::Status] comparing success code '$code' to current status code '".$self->{CURRENT_CODE}."'.\n";
+		return 1 if($code == $self->{CURRENT_CODE})
+	}
 	return 0;
 }
 

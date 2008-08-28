@@ -36,7 +36,7 @@ This module is used to represent a package for slack-get
     use Slackware::Slackget::Package;
 
     my $package = Slackware::Slackget::Package->new('package-1.0.0-noarch-1');
-    $package->setValue('description',"This is a test of the Slackware::Slackget::Package object");
+    $package->set_value('description',"This is a test of the Slackware::Slackget::Package object");
     $package->fill_object_from_package_name();
 
 This class inheritate from Slackware::Slackget::MD5, so you can use :
@@ -89,6 +89,7 @@ sub new
 This method merge $another_package with $package. 
 
 ** WARNING ** : $another_package will be destroy in the operation (this is a collateral damage ;-), for some dark preocupation of memory.
+
 ** WARNING 2 ** : the merge keep the id from $package, this mean that an inconsistency can be found between the id and the version number.
 
 This method overwrite existing value.
@@ -164,8 +165,8 @@ sub compare_version
 	if($o_pack->can('version'))
 	{
 # 		print "compare_version ",$self->get_id()," v. ",$self->version()," and ",$o_pack->get_id()," v. ",$o_pack->version(),"\n";
-		$o_pack->setValue('version','0.0.0') unless(defined($o_pack->version()));
-		$self->setValue('version','0.0.0') unless(defined($self->version()));
+		$o_pack->set_value('version','0.0.0') unless(defined($o_pack->version()));
+		$self->set_value('version','0.0.0') unless(defined($self->version()));
 		my @o_pack_version = split(/\./, $o_pack->version()) ;
 		my @self_version = split(/\./, $self->version()) ;
 		for(my $k=0; $k<=$#self_version; $k++)
@@ -231,47 +232,53 @@ sub fill_object_from_package_name{
 	my $self = shift;
 	if($self->{ROOT}=~ /^(.*)-([0-9].*)-(i[0-9]86|noarch)-(\d{1,2})(\.tgz)?$/)
 	{
-		$self->setValue('name',$1);
-		$self->setValue('version',$2);
-		$self->setValue('architecture',$3);
-		$self->setValue('package-version',$4);
-		$self->setValue('package-maintener','Slackware team') if(defined($self->{SOURCE}) && $self->{SOURCE}=~/^slackware$/i);
+		print "Slackware::Slackget->fill_object_from_package_name() : rg1 matched\n" if($ENV{SG_DAEMON_DEBUG});
+		$self->set_value('name',$1);
+		$self->set_value('version',$2);
+		$self->set_value('architecture',$3);
+		$self->set_value('package-version',$4);
+		$self->set_value('package-maintener','Slackware team') if(defined($self->{SOURCE}) && $self->{SOURCE}=~/^slackware$/i);
 	}
 	elsif($self->{ROOT}=~ /^(.*)-([0-9].*)-(i[0-9]86|noarch)-([^\-]+)(\.tgz)?$/)
 	{
-		$self->setValue('name',$1);
-		$self->setValue('version',$2);
-		$self->setValue('architecture',$3);
-		$self->setValue('package-version',$4);
-# 		$self->setValue('package-maintener',$5) if(!defined($self->getValue('package-maintener')));
+		print "Slackware::Slackget->fill_object_from_package_name() : rg2 matched\n" if($ENV{SG_DAEMON_DEBUG});
+		$self->set_value('name',$1);
+		$self->set_value('version',$2);
+		$self->set_value('architecture',$3);
+		$self->set_value('package-version',$4);
+# 		$self->set_value('package-maintener',$5) if(!defined($self->getValue('package-maintener')));
 	}
 	elsif($self->{ROOT}=~ /^(.*)-([0-9].*)-(i[0-9]86|noarch)-(\d{1,2})(\w*)(\.tgz)?$/)
 	{
-		$self->setValue('name',$1);
-		$self->setValue('version',$2);
-		$self->setValue('architecture',$3);
-		$self->setValue('package-version',$4);
-# 		$self->setValue('package-maintener',$5) if(!defined($self->getValue('package-maintener')));
+		print "Slackware::Slackget->fill_object_from_package_name() : rg3 matched\n" if($ENV{SG_DAEMON_DEBUG});
+		$self->set_value('name',$1);
+		$self->set_value('version',$2);
+		$self->set_value('architecture',$3);
+		$self->set_value('package-version',$4);
+# 		$self->set_value('package-maintener',$5) if(!defined($self->getValue('package-maintener')));
 	}
 	elsif($self->{ROOT}=~ /^(.*)-([^-]+)-(i[0-9]86|noarch)-(\d{1,2})(\.tgz)?$/)
 	{
-		$self->setValue('name',$1);
-		$self->setValue('version',$2);
-		$self->setValue('architecture',$3);
-		$self->setValue('package-version',$4);
-		$self->setValue('package-maintener','Slackware team') if(defined($self->{SOURCE}) && $self->{SOURCE}=~/^slackware$/i);
+		print "Slackware::Slackget->fill_object_from_package_name() : rg4 matched\n" if($ENV{SG_DAEMON_DEBUG});
+		$self->set_value('name',$1);
+		$self->set_value('version',$2);
+		$self->set_value('architecture',$3);
+		$self->set_value('package-version',$4);
+		$self->set_value('package-maintener','Slackware team') if(defined($self->{SOURCE}) && $self->{SOURCE}=~/^slackware$/i);
 	}
 	elsif($self->{ROOT}=~ /^(.*)-([^-]+)-(i[0-9]86|noarch)-(\d{1,2})(\w*)(\.tgz)?$/)
 	{
-		$self->setValue('name',$1);
-		$self->setValue('version',$2);
-		$self->setValue('architecture',$3);
-		$self->setValue('package-version',$4);
-# 		$self->setValue('package-maintener',$5) if(!defined($self->getValue('package-maintener')));
+		print "Slackware::Slackget->fill_object_from_package_name() : rg5 matched\n" if($ENV{SG_DAEMON_DEBUG});
+		$self->set_value('name',$1);
+		$self->set_value('version',$2);
+		$self->set_value('architecture',$3);
+		$self->set_value('package-version',$4);
+# 		$self->set_value('package-maintener',$5) if(!defined($self->getValue('package-maintener')));
 	}
 	else
 	{
-		$self->setValue('name',$self->{ROOT});
+		print "Slackware::Slackget->fill_object_from_package_name() : no regexp match possible !!\n" if($ENV{SG_DAEMON_DEBUG});
+		$self->set_value('name',$self->{ROOT});
 	}
 	$self->{STATS}->{hw} = [split(/-/,$self->getValue('name'))];
 }
@@ -303,17 +310,17 @@ sub extract_informations {
 		elsif($_ =~ /^\s*(COMPRESSED PACKAGE SIZE|PACKAGE SIZE \(compressed\))\s*:\s*(.*) K/)
 		{
 # 			print "[Slackware::Slackget::Package] (debug) compressed size: $2\n" if($ENV{SG_DAEMON_DEBUG});
-			$self->setValue('compressed-size',$2);
+			$self->set_value('compressed-size',$2);
 		}
 		elsif($_ =~ /^\s*(UNCOMPRESSED PACKAGE SIZE|PACKAGE SIZE \(uncompressed\))\s*:\s*(.*) K/)
 		{
 # 			print "[Slackware::Slackget::Package] (debug) uncompressed size: $2\n" if($ENV{SG_DAEMON_DEBUG});
-			$self->setValue('uncompressed-size',$2);
+			$self->set_value('uncompressed-size',$2);
 		}
 		elsif($_ =~ /^\s*PACKAGE LOCATION\s*:\s*(.*)\s*/)
 		{
 # 			print "[Slackware::Slackget::Package] (debug) package location: $1\n" if($ENV{SG_DAEMON_DEBUG});
-			$self->setValue('package-location',$1);
+			$self->set_value('package-location',$1);
 		}
 		elsif($_ =~ /^\s*PACKAGE REQUIRED\s*:\s*(.*)\s*/)
 		{
@@ -337,7 +344,7 @@ sub extract_informations {
 				push @dep, $tmp_array;
 			}
 # 			print "==> dump for package $self->{ROOT}  (",$self->getValue('package-source'),") <==\n",Dumper(@dep); <STDIN>;
-			$self->setValue('required',[@dep]);
+			$self->set_value('required',[@dep]);
 		}
 		elsif($_ =~ /^\s*PACKAGE SUGGESTS\s*:\s*([^\n]*)\s*/)
 		{
@@ -358,15 +365,37 @@ sub extract_informations {
 				}
 				push @dep, $tmp_array;
 			}
-			$self->setValue('suggested',[@dep]);
+			$self->set_value('suggested',[@dep]);
+			
+		}
+		elsif($_ =~ /^\s*PACKAGE CONFLICTS\s*:\s*([^\n]*)\s*/)
+		{
+			my $raw_deps = $1;
+			my @dep=();
+			foreach my $d ( split(/,|;/,$raw_deps) ){
+				my $tmp_array = [];
+				foreach my $i (split(/\|/,$d) ){
+					if($i=~ /^\s*([^><=]+)\s*([><=]+)\s*(.+)\s*$/){
+						 my $ref = {pkg_name => $1, comparison_type => $2, required_version => $3};
+						 $ref->{required_version} = $1 if($ref->{required_version} =~ /^(.+)-(.+)-(.+)$/);
+						 $ref->{comparison_type} = '=<' if($ref->{comparison_type} eq '<=');
+						 $ref->{comparison_type} = '>=' if($ref->{comparison_type} eq '=>');
+						push @{$tmp_array}, $ref;
+					}elsif(defined($i) && $i !~ /(,|;|\|)/ ){
+						push @{$tmp_array}, {pkg_name => $i};
+					}
+				}
+				push @dep, $tmp_array;
+			}
+			$self->set_value('conflicts',[@dep]);
 			
 		}
 		elsif($_=~/^\s*PACKAGE DESCRIPTION:\s*\n*(.*)/ms)
 		{
 # 			print "descr ";
-			$self->setValue('description',$1);
+			$self->set_value('description',$1);
 			if(defined($1)){
-				$self->setValue('shortdescription',$1);
+				$self->set_value('shortdescription',$1);
 			}
 			$is_descr=1;
 
@@ -375,16 +404,16 @@ sub extract_informations {
 		}
 		elsif($is_descr){
 			if(/^\s*[^:]+\s*:\s*(.+)$/){
-				$self->setValue('description', $self->getValue('description')."$1\n" );
+				$self->set_value('description', $self->getValue('description')."$1\n" );
 				unless($have_sd){
-					$self->setValue('shortdescription',$1);
+					$self->set_value('shortdescription',$1);
 					$have_sd=1;
 				}
 			}
 		}
 	}
 	$self->clean_description ;
-	my @t = split(/\s/,$self->getValue('description'));
+	my @t = split(/\s/,$self->get_value('description'));
 	$self->{STATS}->{dwc} = scalar(@t);
 # 	print "[Slackware::Slackget::Package] (debug) description:\n",$self->getValue('description'),"\n" if($ENV{SG_DAEMON_DEBUG});
 }
@@ -427,74 +456,74 @@ sub grab_info_from_description
 	return unless( defined($self->{PACK}->{description}) );
 	# NOTE: je remplace ici tout les elsif() par des if() histoire de voir si l'extraction d'information est plus interressante.
 	if($self->{PACK}->{description}=~ /this\s+version\s+.*\s+was\s+comp(iled|lied)\s+for\s+([^\n]*)\s+(.|\n)*\s+by\s+([^\n\t]*)/i){
-		$self->setValue('info-destination-slackware',$2);
-		$self->setValue('package-maintener',$4);
+		$self->set_value('info-destination-slackware',$2);
+		$self->set_value('package-maintener',$4);
 	}
 	if($self->{PACK}->{description}=~ /\s*(http:\/\/[^\s]+)/i){
-		$self->setValue('info-homepage',$1);
+		$self->set_value('info-homepage',$1);
 	}
 	if($self->{PACK}->{description}=~ /\s*([\w\.\-]+\@[^\s]+\.[\w]+)/i){
-		$self->setValue('info-packager-mail',$1);
+		$self->set_value('info-packager-mail',$1);
 	}
 	
 	if($self->{PACK}->{description}=~ /Package\s+created\s+by:\s+(.*)\s+&lt;([^\n\t]*)&gt;/i){
-		$self->setValue('info-pacdatekager-mail',$2);
-		$self->setValue('package-maintener',$1);
+		$self->set_value('info-pacdatekager-mail',$2);
+		$self->set_value('package-maintener',$1);
 	}
 	elsif($self->{PACK}->{description}=~ /Packager:\s+(.*)\s+&lt;(.*)&gt;/i){
-		$self->setValue('package-maintener',$1);
-		$self->setValue('info-packager-mail',$2);
+		$self->set_value('package-maintener',$1);
+		$self->set_value('info-packager-mail',$2);
 	}
 	elsif($self->{PACK}->{description}=~ /Package\s+created\s+.*by\s+(.*)\s+\(([^\n\t]*)\)/i){
-		$self->setValue('package-maintener',$1);
-		$self->setValue('info-packager-mail',$2);
+		$self->set_value('package-maintener',$1);
+		$self->set_value('info-packager-mail',$2);
 	}
 	elsif ( $self->{PACK}->{description}=~ /Packaged by ([^\s]+) ([^\s]+) \((.*)\)/i)
 	{
-		$self->setValue('package-maintener',"$1 $2");
-		$self->setValue('info-packager-mail',$3);
+		$self->set_value('package-maintener',"$1 $2");
+		$self->set_value('info-packager-mail',$3);
 	}
 	elsif($self->{PACK}->{description}=~ /\s*Package\s+Maintainer:\s+(.*)\s+\(([^\n\t]*)\)/i){
-		$self->setValue('package-maintener',$1);
-		$self->setValue('info-packager-mail',$2);
+		$self->set_value('package-maintener',$1);
+		$self->set_value('info-packager-mail',$2);
 	}
 	elsif($self->{PACK}->{description}=~ /Packaged\s+by\s+(.*)\s+&lt;([^\n\t]*)&gt;/i){
-		$self->setValue('package-maintener',$1);
-		$self->setValue('info-packager-mail',$2);
+		$self->set_value('package-maintener',$1);
+		$self->set_value('info-packager-mail',$2);
 	}
 	
 	if ( $self->{PACK}->{description}=~ /Package created by ([^\s]+) ([^\s]+)/i)
 	{
-		$self->setValue('package-maintener',"$1 $2");
+		$self->set_value('package-maintener',"$1 $2");
 	}
 	
 	if($self->{PACK}->{description}=~ /Packaged\s+by:?\s+(.*)(\s+(by|for|to|on))?/i){
-		$self->setValue('package-maintener',$1);
+		$self->set_value('package-maintener',$1);
 	}
 	if($self->{PACK}->{description}=~ /Package\s+created\s+by:?\s+([^\n\t]*)/i){
-		$self->setValue('package-maintener',$1);
+		$self->set_value('package-maintener',$1);
 	}
 	
 	if($self->{PACK}->{description}=~ /Package\s+created\s+by\s+(.*)\s+\[([^\n\t]*)\]/i){
-		$self->setValue('info-homepage',$2);date
-		$self->setValue('package-maintener',$1);
+		$self->set_value('info-homepage',$2);date
+		$self->set_value('package-maintener',$1);
 	}
 	if($self->{PACK}->{description}=~ /Packager:\s+([^\n\t]*)/i){
-		$self->setValue('package-maintener',$1);
+		$self->set_value('package-maintener',$1);
 	}
 	if($self->{PACK}->{description}=~ /Packager\s+([^\n\t]*)/i){
-		$self->setValue('package-maintener',$1);
+		$self->set_value('package-maintener',$1);
 	}
 	if($self->{PACK}->{description}=~ /Home\s{0,1}page: ([^\n\t]*)/i){
-		$self->setValue('info-homepage',$1);
+		$self->set_value('info-homepage',$1);
 	}
 	if($self->{PACK}->{description}=~ /Package URL: ([^\n\t]*)/i){
-		$self->setValue('info-homepage',$1);
+		$self->set_value('info-homepage',$1);
 	}
 	
 	if($self->{PACK}->{description}=~ /Package creat(ed|e) with ([^\s]*) ([^\s]*)/i){
-		$self->setValue('info-packager-tool',$2);
-		$self->setValue('info-packager-tool-version',$3);
+		$self->set_value('info-packager-tool',$2);
+		$self->set_value('info-packager-tool-version',$3);
 	}
 	
 }
@@ -592,13 +621,92 @@ sub to_xml
 
 =head2 to_string
 
-Alias for to_xml()
+Return a string describing the package using the official Slackware text based semantic.
+
+	my $text = $package->to_string();
+
+In this case, $text contains something like that :
+
+	PACKAGE NAME:  test_package-1.0-i486-1.tgz 
+	PACKAGE LOCATION:  ./path/to/test_package/
+	PACKAGE SIZE (compressed):  677 K
+	PACKAGE SIZE (uncompressed):  1250 K
+	PACKAGE REQUIRED:  acl >= 2.2.47_1-i486-1,attr >= 2.4.41_1-i486-1,cxxlibs >= 6.0.9-i486-1 | gcc-g++ >= 4.2.3-i486-1,expat >= 2.0.1-i486-1,fontconfig >= 2.4.2-i486-2,freetype >= 2.3.5-i486-1,
+	PACKAGE CONFLICTS:  
+	PACKAGE SUGGESTS:  
+	PACKAGE DESCRIPTION:
+	test_package: Test Package
+	test_package:
+	test_package: Test Package is a package for testing
+	test_package: the slack-get API.
+	test_package:
+
+WARNING: This method behavior have changed compare to previous versions.
 
 =cut
 
 sub to_string{
 	my $self = shift;
-	$self->to_xml();
+	my $text = '';
+	$text .= "PACKAGE NAME: ".$self->get_id()."\n";
+	$text .= "PACKAGE LOCATION: ".$self->location()."\n";
+	$text .= "PACKAGE SIZE (compressed): ".$self->compressed_size()." K\n";
+	$text .= "PACKAGE SIZE (uncompressed): ".$self->uncompressed_size()." K\n";
+	if($self->{PACK}->{'required'}){
+		$text .= "PACKAGE REQUIRED: ";
+		foreach my $dep ( @{$self->{PACK}->{'required'}} ){
+			next if(ref($dep) ne 'ARRAY');
+			foreach my $ad (@{$dep}){
+				$text .= "$ad->{pkg_name}";
+				$text .= " $ad->{comparison_type}" if($ad->{comparison_type});
+				$text .= " $ad->{required_version}" if($ad->{required_version});
+				$text .= "|";
+			}
+			chop($text);
+			$text .= ",";
+		}
+		chop($text);
+		$text .= "\n";
+	}
+	if($self->{PACK}->{'suggested'}){
+		$text .= "PACKAGE SUGGESTS: ";
+		foreach my $dep ( @{$self->{PACK}->{'suggested'}} ){
+			next if(ref($dep) ne 'ARRAY');
+			foreach my $ad (@{$dep}){
+				$text .= "$ad->{pkg_name}";
+				$text .= " $ad->{comparison_type}" if($ad->{comparison_type});
+				$text .= " $ad->{required_version}" if($ad->{required_version});
+				$text .= "|";
+			}
+			chop($text);
+			$text .= ",";
+		}
+		chop($text);
+		$text .= "\n";
+	}
+	if($self->{PACK}->{'conflicts'}){
+		$text .= "PACKAGE CONFLICTS: ";
+		foreach my $dep ( @{$self->{PACK}->{'conflicts'}} ){
+			next if(ref($dep) ne 'ARRAY');
+			foreach my $ad (@{$dep}){
+				$text .= "$ad->{pkg_name}";
+				$text .= " $ad->{comparison_type}" if($ad->{comparison_type});
+				$text .= " $ad->{required_version}" if($ad->{required_version});
+				$text .= "|";
+			}
+			chop($text);
+			$text .= ",";
+		}
+		chop($text);
+		$text .= "\n";
+	}
+	my $short_name = lc( $self->name() );
+	$text .= "PACKAGE DESCRIPTION:\n$short_name: ".$self->get_value('shortdescription')."\n$short_name: \n";
+	foreach my $l ( split(/\.\s*/,$self->description() )){
+		$text .= "$short_name: $l.\n";
+	}
+	$text .= "$short_name: \n";
+	return $text;
 }
 
 =head2 to_HTML (deprecated)
@@ -806,7 +914,38 @@ sub status {
 	return 1;
 }
 
+=head2 add_dependency
 
+Add a dependency to the package. Parameters are :
+
+* the type of dependency between : required, suggested, conflicts
+* the dependency as a hashref containing the following keys : pkg_name (mandatory),  comparison_type and required_version (optional).
+
+	$package->add_dependency('required',{pkg_name => 'gcc', comparison_type => '>=', required_version => '4.2'}) ;
+
+If you want to let a choice between 2 or more dependencies (like between cxxlibs and gcc-g++), use an arrayref which contains as mush hashref as needed :
+
+	$package->add_dependency('required',[{pkg_name => 'gcc-g++', comparison_type => '>=', required_version => '4.2.3'},{pkg_name => 'cxxlibs', comparison_type => '>=', required_version => '6.0.9'}]) ;
+
+=cut
+
+sub add_dependency {
+	my ($self,$type,$dep) = @_ ;
+	if(defined($type) && ($type eq 'required' || $type eq 'suggested' || $type eq 'conflicts') ){
+		my $deps_array = $self->get_value($type);
+		if( ref($dep) eq 'HASH' ){
+# 			print "Slackware::Slackget::Package->add_dependency(): adding a single dependency\n";
+			push @{$deps_array},[$dep];
+		}
+		elsif( ref($dep) eq 'ARRAY' ){
+# 			print "Slackware::Slackget::Package->add_dependency(): adding an array of dependencies\n";
+			push @{$deps_array},$dep;
+		}
+	}
+	else{
+		return 0;
+	}
+}
 
 =head2 _setId [PRIVATE]
 
@@ -925,7 +1064,7 @@ sub location{
 
 return the list of conflicting pakage.
 
-	$string = $package->conflict();
+	$string = $package->conflicts();
 
 =cut
 

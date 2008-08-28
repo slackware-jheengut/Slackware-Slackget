@@ -42,6 +42,10 @@ ok( $package->version eq '12.0.0');
 ok( $package->description eq 'Package desciption test' );
 ok( $package->is_heavy_word('aaa_base') );
 ok($package->get_fields_list);
+$package->set_value('shortdescription','Package desciption test');
+$package->set_value('package-location','slackware/test/');
+$package->set_value('compressed-size',930);
+$package->set_value('uncompressed-size',1250);
 
 # Format test
 ok($package->to_XML);

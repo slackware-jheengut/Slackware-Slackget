@@ -18,11 +18,11 @@ Slackware::Slackget::Base - A module which centralize some base methods usefull 
 
 =head1 VERSION
 
-Version 1.0.2
+Version 1.0.4
 
 =cut
 
-our $VERSION = '1.0.3';
+our $VERSION = '1.0.4';
 eval 'use XML::Parser';
 if($@) {
 	warn("XML::Parser is not installed. XML processing operations will be very slow.\n");
@@ -220,17 +220,17 @@ sub compil_packages_directory
 				elsif($file[$k] =~ /^COMPRESSED PACKAGE SIZE:\s+(.*) K$/)
 				{
 	# 				print STDERR "[DEBUG] setting param 'compressed-size' to $1\n";
-					$pack->setValue('compressed-size',$1);
+					$pack->set_value('compressed-size',$1);
 				}
 				elsif($file[$k] =~ /^UNCOMPRESSED PACKAGE SIZE:\s+(.*) K$/)
 				{
 	# 				print STDERR "[DEBUG] setting param 'uncompressed-size' to $1\n";
-					$pack->setValue('uncompressed-size',$1);
+					$pack->set_value('uncompressed-size',$1);
 				}
 				elsif($file[$k] =~ /^PACKAGE LOCATION:\s+(.*) K$/)
 				{
 	# 				print STDERR "[DEBUG] setting param 'location' to $1\n";
-					$pack->setValue('location',$1);
+					$pack->set_value('location',$1);
 				}
 				elsif($file[$k]=~/PACKAGE DESCRIPTION:/)
 				{
@@ -244,14 +244,14 @@ sub compil_packages_directory
 						$k++;
 					}
 	# 				print STDERR "[DEBUG] setting param 'description' to $tmp\n";
-					$pack->setValue('description',"$tmp\n\t\t");
+					$pack->set_value('description',"$tmp\n\t\t");
 					### NOTE: On my system, with 586 packages installed the difference between with or without including the file list is very important
 					### NOTE: with the file list the installed.xml file size is near 11 MB
 					### NOTE: without the file list, the size is only 400 KB !!
 					### NOTE: So I have decided that the file list is not include by default
 					if(defined($self->{'include-file-list'}))
 					{
-						$pack->setValue('file-list',join("\t\t\t",@file[($k+1)..$#file])."\n\t\t");
+						$pack->set_value('file-list',join("\t\t\t",@file[($k+1)..$#file])."\n\t\t");
 					}
 					last;	
 				}
@@ -260,7 +260,7 @@ sub compil_packages_directory
 			$pack->clean_description();
 	# 		print STDERR "[DEBUG] calling Slackware::Slackget::Package->grab_info_from_description() on package $pack\n";
 			$pack->grab_info_from_description();
-# 			$pack->setValue('package-file-checksum',$file_md5);
+# 			$pack->set_value('package-file-checksum',$file_md5);
 	# 		print STDERR "[DEBUG] calling Slackware::Slackget::PackageList->add() on package $pack\n";
 			$packagelist->add($pack);
 			$sg_file->Close();
@@ -309,7 +309,7 @@ sub load_installed_list_from_xml_file {
 	foreach my $pack_name (keys(%{$xml_in->{'package'}})){
 		my $package = new Slackware::Slackget::Package ($pack_name);
 		foreach my $key (keys(%{$xml_in->{'package'}->{$pack_name}})){
-			$package->setValue($key,$xml_in->{'package'}->{$pack_name}->{$key}) ;
+			$package->set_value($key,$xml_in->{'package'}->{$pack_name}->{$key}) ;
 		}
 		$package_list->add($package);
 	}
@@ -359,11 +359,11 @@ sub load_packages_list_from_xml_file {
 			foreach my $key (keys(%{$xml_in->{$group}->{'package'}->{$pack_name}})){
 				if($key eq 'date')
 				{
-					$package->setValue($key,Slackware::Slackget::Date->new(%{$xml_in->{$group}->{'package'}->{$pack_name}->{$key}}));
+					$package->set_value($key,Slackware::Slackget::Date->new(%{$xml_in->{$group}->{'package'}->{$pack_name}->{$key}}));
 				}
 				else
 				{
-					$package->setValue($key,$xml_in->{$group}->{'package'}->{$pack_name}->{$key}) ;
+					$package->set_value($key,$xml_in->{$group}->{'package'}->{$pack_name}->{$key}) ;
 				}
 				
 			}

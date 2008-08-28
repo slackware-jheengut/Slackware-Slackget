@@ -209,7 +209,29 @@ sub get_indexes
 	return keys(%{$self->{INDEX}}) ;
 }
 
-
+sub __to_string {
+	my $self = shift ;
+# 	PACKAGES.TXT;  Tue Aug 26 23:19:17 CEST 2008
+# 	
+# 	This file provides details on the packages found on this site
+# 	Total size of all packages (compressed) :  4002 MB
+# 	Total size of all packages (uncompressed) :  10091 MB
+	my $now_string = localtime;
+	my $text = "PACKAGES.TXT; $now_string\n\nThis file provides details on the packages found on this site\n";
+	my $tsc = 0; # total size compressed
+	my $tsu = 0; # total size uncompressed
+	my $tmp_text = '';
+	foreach (@{$self->{LIST}}){
+		$tmp_text .= $_->to_string()."\n";
+		$tsc += $_->compressed_size();
+		$tsu += $_->uncompressed_size();
+	}
+	$tmp_text =~ s/\n{3,}/\n\n/g;
+	$tsc = int( $tsc / 1024 );
+	$tsu = int( $tsu / 1024 );
+	$text .= "Total size of all packages (compressed) :  $tsc MB\nTotal size of all packages (uncompressed) :  $tsu MB\n\n";
+	$text .= "$tmp_text\n";
+}
 
 =head1 AUTHOR
 

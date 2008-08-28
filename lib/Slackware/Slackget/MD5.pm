@@ -10,11 +10,11 @@ Slackware::Slackget::MD5 - A simple class to verify files checksums
 
 =head1 VERSION
 
-Version 0.1
+Version 0.2
 
 =cut
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 =head1 SYNOPSIS
 
@@ -67,7 +67,7 @@ This method also set a 'computed-checksum' and a 'computed-signature-checksum' i
 sub verify_md5
 {
 	my ($self,$file) = @_;
-	return undef if(ref($self) eq '' || !$self->can("getValue")) ;
+	return undef if(ref($self) eq '' || !$self->can("get_value")) ;
 	my $out = `2>&1 LANG=en_US md5sum $file`;
 	chomp $out;
 	if($out=~ /^([^\s]+)\s+.*/)
@@ -76,8 +76,8 @@ sub verify_md5
 		print "\$tmp_md5 : $tmp_md5\n";
 		if($file =~ /\.tgz$/)
 		{
-			$self->setValue('computed-checksum',$tmp_md5);
-			if($self->getValue('checksum') eq $tmp_md5)
+			$self->set_value('computed-checksum',$tmp_md5);
+			if($self->get_value('checksum') eq $tmp_md5)
 			{
 				return 1;
 			}
@@ -88,8 +88,8 @@ sub verify_md5
 		}
 		elsif($file =~ /\.asc$/)
 		{
-			$self->setValue('computed-signature-checksum',$tmp_md5);
-			if($self->getValue('signature-checksum') eq $tmp_md5)
+			$self->set_value('computed-signature-checksum',$tmp_md5);
+			if($self->get_value('signature-checksum') eq $tmp_md5)
 			{
 				return 1;
 			}

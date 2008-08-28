@@ -9,11 +9,11 @@ Slackware::Slackget::Media - A class to represent a Media from the medias.xml fi
 
 =head1 VERSION
 
-Version 0.9.8
+Version 0.9.9
 
 =cut
 
-our $VERSION = '0.9.8';
+our $VERSION = '0.9.9';
 
 =head1 SYNOPSIS
 
@@ -24,7 +24,7 @@ This class is used by slack-get to represent a media store in the medias.xml fil
     my $Media = Slackware::Slackget::Media->new('slackware');
     my $xml = XML::Simple::XMLin($medias_file,,KeyAttr => {'media' => 'id'});
     $media->fill_object_from_xml($xml->{'slackware'});
-    $media->setValue('description','The official Slackware web site');
+    $media->set_value('description','The official Slackware web site');
 
 This class' usage is mostly the same that the Slackware::Slackget::Package one. There is one big difference with the package class : you must use the accessors for setting the fast and slow medias list.
 
@@ -144,21 +144,21 @@ sub fill_object_from_xml {
 	my ($self,$xml) = @_ ;
 # 	require Data::Dumper ;
 # 	print Data::Dumper::Dumper($xml);
-	$self->setValue('description','no description for this media.') ;
-	$self->setValue('description',$xml->{'description'}) if(defined($xml->{'description'}));
-	$self->setValue('web-link','no website for this media.');
-	$self->setValue('web-link',$xml->{'web-link'}) if(defined($xml->{'web-link'}));
+	
+	defined($xml->{'description'}) ? $self->set_value('description',$xml->{'description'}) : $self->set_value('description','no description for this media.') ;
+	defined($xml->{'web-link'}) ? $self->set_value('web-link',$xml->{'web-link'}) : $self->set_value('web-link','no website for this media.');
+	defined($xml->{'download-signature'}) ? $self->set_value('download-signature',$xml->{'download-signature'}) : $self->set_value('download-signature',0);
 	if(defined($xml->{'files'}))
 	{
-		$self->setValue('filelist',$xml->{'files'}->{'filelist'});
-		$self->setValue('packages',$xml->{'files'}->{'packages'});
-		$self->setValue('checksums',$xml->{'files'}->{'checksums'});
+		$self->set_value('filelist',$xml->{'files'}->{'filelist'});
+		$self->set_value('packages',$xml->{'files'}->{'packages'});
+		$self->set_value('checksums',$xml->{'files'}->{'checksums'});
 	}
 	else
 	{
-		$self->setValue('filelist','FILELIST.TXT');
-		$self->setValue('packages','PACKAGES.TXT');
-		$self->setValue('checksums','CHECKSUMS.md5');
+		$self->set_value('filelist','FILELIST.TXT');
+		$self->set_value('packages','PACKAGES.TXT');
+		$self->set_value('checksums','CHECKSUMS.md5');
 	}
 	if(defined($xml->{'update-repository'}))
 	{
@@ -168,7 +168,7 @@ sub fill_object_from_xml {
 				warn "[Slackware::Slackget::Media] the faster host of the update-repository section will not be accepted as a valid URL by Slackware::Slackget::Connection class !\n";
 			}
 			return undef unless(defined($xml->{'update-repository'}->{faster}));
-			$self->setValue('host',$xml->{'update-repository'}->{faster});
+			$self->set_value('host',$xml->{'update-repository'}->{faster});
 		}
 		if(defined($xml->{'update-repository'}->{fast}) && defined($xml->{'update-repository'}->{fast}->{li}) && ref($xml->{'update-repository'}->{fast}->{li}) eq 'ARRAY')
 		{
@@ -239,6 +239,34 @@ sub _fill_slow_host_section
 	{
 		$self->{DATA}->{hosts}->{slow} = [] ;
 	}
+}
+
+=head2 add_slow_host( <string> )
+
+Add an host to the slow section of the current media.
+
+	$media->add_slow_host("ftp://ftp.fe.up.pt/disk1/ftp.slackware.com/pub/slackware/slackware-current/");
+
+=cut
+
+sub add_slow_host {
+	my ($self,$url) = @_;
+	$self->{DATA}->{hosts}->{slow} = [] unless(exists($self->{DATA}->{hosts}->{slow}));
+	push @{$self->{DATA}->{hosts}->{slow}}, $url;
+}
+
+=head2 add_fast_host( <string> )
+
+Add an host to the fast section of the current media.
+
+	$media->add_fast_host("http://mirror.switch.ch/ftp/mirror/slackware/slackware-current/");
+
+=cut
+
+sub add_fast_host {
+	my ($self,$url) = @_;
+	$self->{DATA}->{hosts}->{fast} = [] unless(exists($self->{DATA}->{hosts}->{fast}));
+	push @{$self->{DATA}->{hosts}->{fast}}, $url;
 }
 
 =head2 next_host

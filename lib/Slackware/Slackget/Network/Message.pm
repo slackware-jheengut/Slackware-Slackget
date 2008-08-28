@@ -41,7 +41,7 @@ sub new
 
 =head2 new_from_data
 
-This is an alternative constructor to create a S::Sg::N::Message with the whole slack-get protocol compatible data structure.
+This is an alternative constructor to create a Slackware::Slackget::Network::Message with the whole slack-get protocol compatible data structure.
 
 You must provide the following arguments :
 
@@ -90,7 +90,7 @@ sub new_from_data {
 
 Create a base enveloppe for the SlackGetProtocol in the raw_data section. This method access directly to the object's data structure.
 
-Be carefull not to use it on an already initialized object.
+Be carefull not to use it on an already initialized object. Else all "raw_data" will be lost.
 
 	$self = {
 		action => 0,

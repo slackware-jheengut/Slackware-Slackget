@@ -202,12 +202,14 @@ sub multi_search
 		my $cpt = 0 ;
 		foreach my $field (@{$fields})
 		{
+# 			print STDERR "[Slackware::Slackget::Search->multi_search()] (debug) looking for field: $field\n";
 			my $field_value;
 			if($field=~ /^([^=]+)=(.+)/)
 			{
+# 				print STDERR "[Slackware::Slackget::Search->multi_search()] (debug) got a A=B type field (A=$1 and B=$2)\n";
 				if(defined($_->getValue($1)) && $_->getValue($1) ne $2)
 				{
-					$is_result = undef;
+					$is_result = 0;
 					last ;
 				}
 				elsif(defined($_->getValue($1)) && $_->getValue($1) eq $2)
@@ -240,7 +242,7 @@ sub multi_search
 		{
 			print STDERR "[slack-get] (search engine debug) package ",$_->get_id," got a score of $cpt and a 'is_result' of $is_result\n" if($is_result && $cpt);
 			$_->setValue('score',$cpt);
-			$_->setValue('slackget10-search-version',$VERSION);
+			$_->setValue('slackware-slackget-search-version',$VERSION);
 			push @result, $_ ;
 		}
 	}

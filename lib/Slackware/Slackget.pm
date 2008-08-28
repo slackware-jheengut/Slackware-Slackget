@@ -7,18 +7,19 @@ require Slackware::Slackget::Base ;
 require Slackware::Slackget::Network::Auth ;
 require Slackware::Slackget::Config ;
 require Slackware::Slackget::PkgTools ;
+use Slackware::Slackget::File;
 
 =head1 NAME
 
-Slackware::Slackget - The main slack-get 1.0 library
+Slackware::Slackget - Main library for slack-get package manager 1.X
 
 =head1 VERSION
 
-Version 0.16
+Version 0.17
 
 =cut
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 =head1 SYNOPSIS
 
@@ -40,7 +41,7 @@ This module is still beta development version and I release it on CPAN only for 
 
 =head1 CONSTRUCTOR
 
-The constructor (new()), is used to instanciate all needed class for a slack-get instance.
+The constructor ( new() ), is used to instanciate all needed class for a slack-get instance.
 
 =head2 new
 
@@ -67,8 +68,32 @@ sub new {
 	$self->{'base'} = new Slackware::Slackget::Base ( $self->{'config'} );
 	$self->{'pkgtools'} = new Slackware::Slackget::PkgTools ( $self->{'config'} );
 	$self->{'auth'} = Slackware::Slackget::Network::Auth->new( $self->{'config'} );
+	$self->{'slackware_version'}=undef;
 	bless($self,$class) ;
 	return $self;
+}
+
+=head2 slackware_version
+
+Return the host's Slackware version as written in the /etc/slackware-version file.
+
+	if ( $sgo->slackware_version >= 12.0.0 ){
+		print "Slackware distribution is ok, let's continue.\n";
+	}
+
+=cut
+
+sub slackware_version {
+	my $self = shift;
+	unless( defined($self->{'slackware_version'}) ){
+		my $file = Slackware::Slackget::File->new('/etc/slackware-version');
+		my $line = $file->get_line(0);
+		chomp $line;
+		if( $line =~ /^Slackware\s*([\d\.]+)$/ ){
+			$self->{'slackware_version'}=$1;
+		}
+	}
+	return $self->{'slackware_version'};
 }
 
 =head1 FUNCTIONS
@@ -331,6 +356,46 @@ sub pkgtools
 	return $self->{'pkgtools'} ;
 }
 
+=head2 removepkg(<some package>)
+
+Alias for :
+
+	$sgo->pkgtools()->remove(<some package>);
+
+=cut
+
+sub removepkg {
+	my ($self,@params) = @_;
+	return $self->{'pkgtools'}->remove(@params) ;
+}
+
+=head2 installpkg(<some package>)
+
+Alias for :
+
+	$sgo->pkgtools()->install(<some package>);
+
+=cut
+
+sub installpkg {
+	my ($self,@params) = @_;
+	return $self->{'pkgtools'}->install(@params) ;
+}
+
+=head2 upgradepkg(<some package>)
+
+Alias for :
+
+	$sgo->pkgtools()->upgrade(<some package>);
+
+=cut
+
+sub upgradepkg {
+	my ($self,@params) = @_;
+	print "Slackware::slackget::upgradepkg: pass \@params to pkgtools->upgrade(@params).\n";
+	return $self->{'pkgtools'}->upgrade(@params) ;
+}
+
 =head2 config
 
 Return the Slackware::Slackget::Config object of the current instance of the Slackware::Slackget object.
@@ -353,6 +418,36 @@ sub config
 	{
 		return $self->{'config'} ;
 	}
+}
+
+=head2 get_config_token
+
+A wrapper method to get a configuration key. This method call the Slackware::Slackget::Config->get_token() method.
+
+SO YOU HAVE TO COMPLY WITH THIS SYNTAX !
+
+	print "Official media is: ",$sgo->get_config_token('/daemon/official-media'),"\n";
+
+=cut
+
+sub get_config_token {
+	my ($self, $query) = @_;
+	return $self->{'config'}->get_token($query);
+}
+
+=head2 set_config_token
+
+A wrapper method to set a configuration key. This method call the Slackware::Slackget::Config->set_token() method.
+
+SO YOU HAVE TO COMPLY WITH THIS SYNTAX !
+
+	$sgo->set_config_token('/daemon/official-media','slackware-12.0');
+
+=cut
+
+sub set_config_token {
+	my ($self, $query,$value) = @_;
+	return $self->{'config'}->set_token($query,$value);
 }
 
 =head2 auth

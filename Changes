@@ -80,7 +80,7 @@ Revision history for Slackware::Slackget
 	- fix is_heavy_word() method in Slackware::Slackget::Package, wich now return the correct result
 	- update Slackware::Slackget::Date to make it fill the month-name from the month-number
 	- update Slackware::Slackget::Date by overloading '<=>' and 'cmp'
-	- changed all classes of the Slackware::Slackget module to be compliant with the slack-get naming convention (SGNCC : Slack-Get Naming Convention Compliant) (http://www.infinityperl.org/post/2008/01/30/slack-get-API-review)
+	- changed all classes of the Slackware::Slackget module to be compliant with the slack-get naming convention (SGNCC : Slack-Get Naming Convention Compliant) (http://www.infinityperl.org/post/2008/02/02/SGNCC-Slack-Get-Naming-Convention-Compliant-:-the-new-slack-gets-naming-convention-document)
 	- add more tests to the test suite for the followings classes :
 		* Slackware::Slackget::File (SGNCC & backward compatible)
 		* Slackware::Slackget::Media (SGNCC & backward compatible)
@@ -93,3 +93,14 @@ Revision history for Slackware::Slackget
 	- the bug with `file` -b option on Solaris should be fixed.
 	- add more tests to the test suite for the followings classes :
 		* Slackware::Slackget::List (SGNCC & backward compatible)
+
+0.17
+	- Fix some modules internal calls to be compliant with the new API (Base.pm,MD5.pm, etc.)
+	- Add the Slackware::Slackget::List tests to the MANIFEST to include it in the archive...
+	- Implements the Slackware::Slackget::GPG->import_key() method
+	- Add the followings methods to Slackware::Slackget::GPG : list_keys(), list_sigs(), key_info(), sig_info().
+	- Removed all the _send_info() part in Slackware::Slackget::PkgTools.
+	- Change Slackware::Slackget::Package::to_string() behavior to generate a Slackware's PACKAGES.TXT compatible string.
+	- Add method to simply add dependencies when generating a package.
+	- Fix the Slackware::Slackget::Package : now generate all dependencies data structure while parsing PACKAGES.TXT files.
+	- Modify the to_string() method from Slackware::Slackget::List to allow a subclass to write its own to_string() method.

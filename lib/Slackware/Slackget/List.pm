@@ -99,7 +99,7 @@ sub add {
 
 return the $index -nth object in the list
 
-	$list->get($index);
+	$element = $list->get($index);
 
 =cut
 
@@ -214,13 +214,19 @@ sub to_html
 
 =head2 to_string
 
-Alias for to_xml()
+If this class is subclassed and if the subclass have a __to_string() method this is one is called.
+
+If not, this method is an alias for to_xml().
 
 =cut
 
 sub to_string{
 	my $self = shift;
-	$self->to_xml();
+	if( $self->can('__to_string') ){
+		return $self->__to_string();
+	}else{
+		return $self->to_xml();
+	}
 }
 
 =head2 Length

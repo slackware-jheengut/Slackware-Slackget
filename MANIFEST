@@ -50,6 +50,8 @@ t/07-Date.t
 t/08-Package-backward-compatible.t
 t/09-Package.t
 t/10-Base.t
+t/11-List-backward-compatible.t
+t/12-List.t
 t/boilerplate.t
 t/config.xml
 t/medias.xml
